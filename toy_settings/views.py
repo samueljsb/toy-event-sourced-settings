@@ -13,7 +13,7 @@ from . import services
 
 
 def _get_repo() -> repositories.Repository:
-    return repositories.MEMORY_REPO
+    return repositories.FileSystemRepo()
 
 
 class Settings(generic.TemplateView):
