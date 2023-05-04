@@ -34,8 +34,8 @@ class Repository(abc.ABC):
 
 
 class MemoryRepo(Repository):
-    def __init__(self) -> None:
-        self.events: list[events.Event] = []
+    def __init__(self, history: list[events.Event] | None = None) -> None:
+        self.events: list[events.Event] = history or []
 
     def record(self, event: events.Event) -> None:
         self.events.append(event)
