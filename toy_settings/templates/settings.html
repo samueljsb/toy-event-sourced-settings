@@ -1,0 +1,25 @@
+{% extends '_base.html' %}
+
+{% block content %}
+<h1>Settings</h1>
+
+<a class="btn btn-primary" href="set/">Add a setting</a>
+
+<table class="table">
+  <tr>
+    <th>Key</th><th>Value</th><th>Actions</th>
+  </tr>
+  {% for key, value in settings %}
+  <tr>
+    <td><a href="/history/{{ key }}/">{{ key }}</a></td><td>{{ value }}</td>
+    <td>
+      <a class="btn btn-primary" href="/set/?key={{ key }}&value={{ value }}">Edit</a>
+      <form action="/unset/{{ key }}/" method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Unset</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock content %}

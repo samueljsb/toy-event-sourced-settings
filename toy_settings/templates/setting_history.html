@@ -1,0 +1,22 @@
+{% extends '_base.html' %}
+
+{% block content %}
+<h1>{{ key }}</h1>
+
+Current value: {{ value }}
+
+<table class="table">
+  <tr>
+    <th>timestamp</th>
+    <th>value</th>
+    <th>set by</th>
+  </tr>
+  {% for event in events %}
+    <tr>
+      <td>{{ event.timestamp }}</td>
+      <td>{{ event.value }}</td>
+      <td>{{ event.by }}</td>
+    </tr>
+  {% endfor %}
+</table>
+{% endblock content %}
