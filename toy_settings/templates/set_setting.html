@@ -3,7 +3,7 @@
 {% block content %}
 <h1>Set setting</h1>
 
-<form action="/set/" method="post">
+<form action={% url 'set' %} method="post">
   {% csrf_token %}
   {% for field in form %}
     <div class="mb-3">

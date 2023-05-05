@@ -5,6 +5,7 @@ from typing import Any
 
 from django import forms
 from django import http
+from django import urls
 from django.http import HttpResponse
 from django.views import generic
 
@@ -52,7 +53,7 @@ class SettingForm(forms.Form):
 class SetSetting(generic.FormView):
     template_name = "set_setting.html"
     form_class = SettingForm
-    success_url = "/"
+    success_url = urls.reverse_lazy("settings")
 
     def get_initial(self) -> dict[str, Any]:
         initial = super().get_initial()
@@ -74,7 +75,7 @@ class SetSetting(generic.FormView):
 
 
 class UnsetSetting(generic.RedirectView):
-    url = "/"
+    url = urls.reverse_lazy("settings")
 
     def post(
         self, request: http.HttpRequest, key: str, *args: Any, **kwargs: Any
