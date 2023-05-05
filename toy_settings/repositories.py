@@ -9,6 +9,7 @@ from typing import Any
 from typing import Generic
 from typing import TypeVar
 
+from . import domain
 from . import events
 
 
@@ -54,19 +55,7 @@ class MemoryRepo(Repository):
             return None
 
     def all_settings(self) -> dict[str, str]:
-        settings = {}
-        for event in self.events:
-            if isinstance(event, events.Set):
-                settings[event.key] = event.value
-            elif isinstance(event, events.Unset):
-                try:
-                    del settings[event.key]
-                except KeyError:
-                    pass
-            else:
-                raise TypeError(f"unrecognised event type: {type(event)!r}")
-
-        return settings
+        return domain.current_settings(self.events)
 
     def events_for_key(self, key: str) -> list[events.Event]:
         return [event for event in self.events if event.key == key]
@@ -198,28 +187,12 @@ class FileSystemRepo(Repository):
             return None
 
     def all_settings(self) -> dict[str, str]:
-        all_events = sorted(
-            (
-                deserialize(file.read_text())
-                for file in self.root.rglob("*")
-                if file.is_file()
-            ),
-            key=lambda e: e.timestamp,
+        all_events = (
+            deserialize(file.read_text())
+            for file in self.root.rglob("*")
+            if file.is_file()
         )
-
-        settings = {}
-        for event in all_events:
-            if isinstance(event, events.Set):
-                settings[event.key] = event.value
-            elif isinstance(event, events.Unset):
-                try:
-                    del settings[event.key]
-                except KeyError:
-                    pass
-            else:
-                raise TypeError(f"unrecognised event type: {type(event)!r}")
-
-        return settings
+        return domain.current_settings(all_events)
 
     def events_for_key(self, key: str) -> list[events.Event]:
         return [deserialize(file.read_text()) for file in self._dir(key).glob("*")]
