@@ -161,15 +161,17 @@ def deserialize(raw_data: str) -> events.Event:
     return serializer.unpack(data["payload"])
 
 
+def _xdg_state_home() -> Path:
+    xdg_state_home = os.getenv("XDG_STATE_HOME")
+    if xdg_state_home and os.path.isabs(xdg_state_home):
+        return Path(xdg_state_home)
+    else:
+        return Path("~/.local/state").expanduser()
+
+
 class FileSystemRepo(Repository):
     def __init__(self) -> None:
-        XDG_STATE_HOME = os.getenv("XDG_STATE_HOME")
-        if XDG_STATE_HOME and os.path.isabs(XDG_STATE_HOME):
-            xdg_state_home = Path(XDG_STATE_HOME)
-        else:
-            xdg_state_home = Path("~/.local/state").expanduser()
-
-        self.root = xdg_state_home / "toy-settings"
+        self.root = _xdg_state_home() / "toy-settings"
         self.root.mkdir(parents=True, exist_ok=True)
 
     def _dir(self, key: str) -> Path:
