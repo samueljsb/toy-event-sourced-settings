@@ -24,7 +24,7 @@ class Settings(generic.TemplateView):
 
         repo = _get_repo()
         settings = repo.all_settings()
-        context["settings"] = sorted(settings.items(), key=lambda kv: kv[0])
+        context["settings"] = sorted(settings.items())
 
         return context
 
