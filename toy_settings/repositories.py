@@ -42,17 +42,7 @@ class MemoryRepo(Repository):
         self.events.append(event)
 
     def current_value(self, key: str) -> str | None:
-        events_ = sorted(self.events_for_key(key), key=lambda e: e.timestamp)
-
-        try:
-            last_event = events_.pop()
-        except IndexError:
-            return None
-
-        if isinstance(last_event, events.Set):
-            return last_event.value
-        else:
-            return None
+        return domain.current_value(key, self.events)
 
     def all_settings(self) -> dict[str, str]:
         return domain.current_settings(self.events)
@@ -174,17 +164,7 @@ class FileSystemRepo(Repository):
         file.write_text(serialize(event))
 
     def current_value(self, key: str) -> str | None:
-        events_ = sorted(self.events_for_key(key), key=lambda e: e.timestamp)
-
-        try:
-            last_event = events_.pop()
-        except IndexError:
-            return None
-
-        if isinstance(last_event, events.Set):
-            return last_event.value
-        else:
-            return None
+        return domain.current_value(key, self.events_for_key(key))
 
     def all_settings(self) -> dict[str, str]:
         all_events = (
