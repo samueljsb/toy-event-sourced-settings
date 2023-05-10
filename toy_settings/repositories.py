@@ -59,18 +59,18 @@ MEMORY_REPO = MemoryRepo()
 _TEvent = TypeVar("_TEvent", bound=events.Event)
 
 
-class Serializer(abc.ABC, Generic[_TEvent]):
+class Codec(abc.ABC, Generic[_TEvent]):
     @abc.abstractmethod
-    def build_payload(self, event: _TEvent) -> dict[str, str]:
+    def encode(self, event: _TEvent) -> dict[str, str]:
         ...
 
     @abc.abstractmethod
-    def unpack(self, payload: dict[str, str]) -> _TEvent:
+    def decode(self, payload: dict[str, str]) -> _TEvent:
         ...
 
 
-class SetSerializer(Serializer[events.Set]):
-    def build_payload(self, event: events.Set) -> dict[str, str]:
+class SetCodec(Codec[events.Set]):
+    def encode(self, event: events.Set) -> dict[str, str]:
         return {
             "id": event.id,
             "timestamp": event.timestamp.isoformat(),
@@ -79,7 +79,7 @@ class SetSerializer(Serializer[events.Set]):
             "value": event.value,
         }
 
-    def unpack(self, payload: dict[str, str]) -> events.Set:
+    def decode(self, payload: dict[str, str]) -> events.Set:
         return events.Set(
             id=payload["id"],
             timestamp=datetime.datetime.fromisoformat(payload["timestamp"]),
@@ -89,8 +89,8 @@ class SetSerializer(Serializer[events.Set]):
         )
 
 
-class UnsetSerializer(Serializer[events.Unset]):
-    def build_payload(self, event: events.Unset) -> dict[str, str]:
+class UnsetCodec(Codec[events.Unset]):
+    def encode(self, event: events.Unset) -> dict[str, str]:
         return {
             "id": event.id,
             "timestamp": event.timestamp.isoformat(),
@@ -98,7 +98,7 @@ class UnsetSerializer(Serializer[events.Unset]):
             "key": event.key,
         }
 
-    def unpack(self, payload: dict[str, str]) -> events.Unset:
+    def decode(self, payload: dict[str, str]) -> events.Unset:
         return events.Unset(
             id=payload["id"],
             timestamp=datetime.datetime.fromisoformat(payload["timestamp"]),
@@ -107,15 +107,15 @@ class UnsetSerializer(Serializer[events.Unset]):
         )
 
 
-SERIALIZERS: tuple[tuple[str, type[events.Event], Serializer[Any]], ...] = (
-    ("set", events.Set, SetSerializer()),
-    ("unset", events.Unset, UnsetSerializer()),
+CODECS: tuple[tuple[str, type[events.Event], Codec[Any]], ...] = (
+    ("set", events.Set, SetCodec()),
+    ("unset", events.Unset, UnsetCodec()),
 )
 
 
-def serialize(event: events.Event) -> str:
+def encode(event: events.Event) -> str:
     try:
-        event_type, serializer = {item[1]: (item[0], item[2]) for item in SERIALIZERS}[
+        event_type, codec = {item[1]: (item[0], item[2]) for item in CODECS}[
             type(event)
         ]
     except KeyError as exc:
@@ -123,21 +123,21 @@ def serialize(event: events.Event) -> str:
 
     data = {
         "event_type": event_type,
-        "payload": serializer.build_payload(event),
+        "payload": codec.encode(event),
     }
     return json.dumps(data)
 
 
-def deserialize(raw_data: str) -> events.Event:
+def decode(raw_data: str) -> events.Event:
     data: dict[str, Any] = json.loads(raw_data)
 
     event_type = data["event_type"]
     try:
-        serializer = {item[0]: item[2] for item in SERIALIZERS}[event_type]
+        codec = {item[0]: item[2] for item in CODECS}[event_type]
     except KeyError as exc:
         raise ValueError(f"unrecognised event type: {event_type!r}") from exc
 
-    return serializer.unpack(data["payload"])
+    return codec.decode(data["payload"])
 
 
 def _xdg_state_home() -> Path:
@@ -161,18 +161,16 @@ class FileSystemRepo(Repository):
     def record(self, event: events.Event) -> None:
         file = self._dir(event.key) / event.id
         file.touch()
-        file.write_text(serialize(event))
+        file.write_text(encode(event))
 
     def current_value(self, key: str) -> str | None:
         return domain.current_value(key, self.events_for_key(key))
 
     def all_settings(self) -> dict[str, str]:
         all_events = (
-            deserialize(file.read_text())
-            for file in self.root.rglob("*")
-            if file.is_file()
+            decode(file.read_text()) for file in self.root.rglob("*") if file.is_file()
         )
         return domain.current_settings(all_events)
 
     def events_for_key(self, key: str) -> list[events.Event]:
-        return [deserialize(file.read_text()) for file in self._dir(key).glob("*")]
+        return [decode(file.read_text()) for file in self._dir(key).glob("*")]
