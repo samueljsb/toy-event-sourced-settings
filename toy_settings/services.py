@@ -5,7 +5,7 @@ import uuid
 
 from . import events
 from . import projections
-from . import repositories
+from . import storage
 
 
 def set(
@@ -14,7 +14,7 @@ def set(
     *,
     timestamp: datetime.datetime,
     by: str,
-    repo: repositories.Repository,
+    repo: storage.Repository,
 ) -> None:
     key = projections.normalize_key(key)
     repo.record(
@@ -29,7 +29,7 @@ def set(
 
 
 def unset(
-    key: str, *, timestamp: datetime.datetime, by: str, repo: repositories.Repository
+    key: str, *, timestamp: datetime.datetime, by: str, repo: storage.Repository
 ) -> None:
     repo.record(
         events.Unset(

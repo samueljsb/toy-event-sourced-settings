@@ -9,12 +9,12 @@ from django import urls
 from django.http import HttpResponse
 from django.views import generic
 
-from . import repositories
 from . import services
+from . import storage
 
 
-def _get_repo() -> repositories.Repository:
-    return repositories.FileSystemRepo()
+def _get_repo() -> storage.Repository:
+    return storage.FileSystemRepo()
 
 
 class Settings(generic.TemplateView):
