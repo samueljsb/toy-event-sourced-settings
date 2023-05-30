@@ -1,0 +1,5 @@
+-r requirements.txt
+
+django-webtest
+pytest
+pytest-django

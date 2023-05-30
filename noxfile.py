@@ -13,5 +13,5 @@ def lint(session: nox.Session) -> None:
 @nox.session(reuse_venv=True)
 def test(session: nox.Session) -> None:
     """Run tests."""
-    session.install("-r", "requirements.txt", "pytest")
+    session.install("-r", "requirements-dev.txt")
     session.run("pytest", "tests", *session.posargs)
