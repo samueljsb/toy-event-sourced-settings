@@ -6,7 +6,6 @@ import uuid
 import attrs
 
 from . import events
-from . import projections
 from . import storage
 
 
@@ -20,6 +19,9 @@ class ToySettings:
             repo=storage.get_repository(),
         )
 
+    def _normalize_key(self, key: str) -> str:
+        return key.strip().replace(" ", "_").replace("-", "_").upper()
+
     def set(
         self,
         key: str,
@@ -28,7 +30,7 @@ class ToySettings:
         timestamp: datetime.datetime,
         by: str,
     ) -> None:
-        key = projections.normalize_key(key)
+        key = self._normalize_key(key)
         self.repo.record(
             events.Set(
                 id=uuid.uuid4().hex,

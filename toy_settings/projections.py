@@ -5,10 +5,6 @@ from typing import Iterable
 from . import events
 
 
-def normalize_key(key: str) -> str:
-    return key.strip().replace(" ", "_").replace("-", "_").upper()
-
-
 def current_settings(history: Iterable[events.Event]) -> dict[str, str]:
     settings = {}
     for event in sorted(history, key=lambda e: e.timestamp):
