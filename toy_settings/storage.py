@@ -13,6 +13,10 @@ from . import events
 from . import projections
 
 
+def get_repository() -> Repository:
+    return FileSystemRepo()
+
+
 class Repository(abc.ABC):
     @abc.abstractmethod
     def record(self, event: events.Event) -> None:

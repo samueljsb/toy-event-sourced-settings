@@ -13,17 +13,13 @@ from . import services
 from . import storage
 
 
-def _get_repo() -> storage.Repository:
-    return storage.FileSystemRepo()
-
-
 class Settings(generic.TemplateView):
     template_name = "settings.html"
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
 
-        repo = _get_repo()
+        repo = storage.get_repository()
         settings = repo.all_settings()
         context["settings"] = sorted(settings.items())
 
@@ -36,7 +32,7 @@ class SettingHistory(generic.TemplateView):
     def get_context_data(self, key: str, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
 
-        repo = _get_repo()
+        repo = storage.get_repository()
         context["key"] = key
         context["value"] = repo.current_value(key)
         events = repo.events_for_key(key)
@@ -69,7 +65,7 @@ class SetSetting(generic.FormView):
             form.cleaned_data["value"],
             timestamp=datetime.datetime.now(),
             by="Some User",
-            repo=_get_repo(),
+            repo=storage.get_repository(),
         )
         return super().form_valid(form)
 
@@ -84,7 +80,7 @@ class UnsetSetting(generic.RedirectView):
             key,
             timestamp=datetime.datetime.now(),
             by="Some User",
-            repo=_get_repo(),
+            repo=storage.get_repository(),
         )
 
         return super().post(request, *args, **kwargs)
