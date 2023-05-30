@@ -62,9 +62,13 @@ class SetSetting(generic.FormView):
 
     def form_valid(self, form: SettingForm) -> HttpResponse:
         toy_settings = services.ToySettings.new()
+
+        key = toy_settings.normalize_key(form.cleaned_data["key"])
+        value = form.cleaned_data["value"]
+
         toy_settings.set(
-            form.cleaned_data["key"],
-            form.cleaned_data["value"],
+            key,
+            value,
             timestamp=datetime.datetime.now(),
             by="Some User",
         )

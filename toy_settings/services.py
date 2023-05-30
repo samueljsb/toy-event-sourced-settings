@@ -30,7 +30,7 @@ class ToySettings:
             repo=storage.get_repository(),
         )
 
-    def _normalize_key(self, key: str) -> str:
+    def normalize_key(self, key: str) -> str:
         return key.strip().replace(" ", "_").replace("-", "_").upper()
 
     def set(
@@ -47,8 +47,6 @@ class ToySettings:
         Raises:
             AlreadySet: The setting already exists.
         """
-        key = self._normalize_key(key)
-
         history = self.repo.events_for_key(key)
         current_value = projections.current_value(key, history)
         if current_value is not None:
