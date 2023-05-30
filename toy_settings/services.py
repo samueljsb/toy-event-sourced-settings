@@ -62,6 +62,35 @@ class ToySettings:
             )
         )
 
+    def change(
+        self,
+        key: str,
+        new_value: str,
+        *,
+        timestamp: datetime.datetime,
+        by: str,
+    ) -> None:
+        """
+        Change the current value of a setting.
+
+        Raises:
+            NotSet: There is no setting for this key.
+        """
+        history = self.repo.events_for_key(key)
+        current_value = projections.current_value(key, history)
+        if current_value is None:
+            raise NotSet(key)
+
+        self.repo.record(
+            events.Changed(
+                id=uuid.uuid4().hex,
+                timestamp=timestamp,
+                by=by,
+                key=key,
+                new_value=new_value,
+            )
+        )
+
     def unset(
         self,
         key: str,

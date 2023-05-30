@@ -40,6 +40,39 @@ def test_set_cannot_update_value():
     assert repo.all_settings() == {"FOO": "42"}
 
 
+def test_can_change_setting():
+    repo = MemoryRepo()
+    toy_settings = services.ToySettings(repo=repo)
+
+    toy_settings.set("FOO", "42", timestamp=datetime.datetime.now(), by="me")
+    toy_settings.change("FOO", "43", timestamp=datetime.datetime.now(), by="me")
+
+    assert repo.all_settings() == {"FOO": "43"}
+
+
+def test_cannot_change_non_existent_setting():
+    repo = MemoryRepo([])
+    toy_settings = services.ToySettings(repo=repo)
+
+    # check we are not allowed to change a setting that does not exist
+    with pytest.raises(services.NotSet):
+        toy_settings.change("FOO", "42", timestamp=datetime.datetime.now(), by="me")
+
+
+def test_cannot_change_unset_setting():
+    repo = MemoryRepo(
+        [
+            _set_event("FOO", "42", id="1"),
+            _unset_event("FOO", id="2"),
+        ]
+    )
+    toy_settings = services.ToySettings(repo=repo)
+
+    # check we are not allowed to change a setting that has been unset
+    with pytest.raises(services.NotSet):
+        toy_settings.change("FOO", "42", timestamp=datetime.datetime.now(), by="me")
+
+
 def test_unset_removes_value():
     repo = MemoryRepo(
         [
