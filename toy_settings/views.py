@@ -60,12 +60,12 @@ class SetSetting(generic.FormView):
         return initial
 
     def form_valid(self, form: SettingForm) -> HttpResponse:
-        services.set(
+        toy_settings = services.ToySettings.new()
+        toy_settings.set(
             form.cleaned_data["key"],
             form.cleaned_data["value"],
             timestamp=datetime.datetime.now(),
             by="Some User",
-            repo=storage.get_repository(),
         )
         return super().form_valid(form)
 
@@ -76,11 +76,11 @@ class UnsetSetting(generic.RedirectView):
     def post(
         self, request: http.HttpRequest, key: str, *args: Any, **kwargs: Any
     ) -> http.HttpResponse:
-        services.unset(
+        toy_settings = services.ToySettings.new()
+        toy_settings.unset(
             key,
             timestamp=datetime.datetime.now(),
             by="Some User",
-            repo=storage.get_repository(),
         )
 
         return super().post(request, *args, **kwargs)
