@@ -96,7 +96,7 @@ def encode(event: events.Event) -> str:
         event_type, codec = {item[1]: (item[0], item[2]) for item in CODECS}[
             type(event)
         ]
-    except KeyError as exc:
+    except KeyError as exc:  # pragma: no cover
         raise TypeError(f"unrecognised event type: {type(event)!r}") from exc
 
     data = {
@@ -112,13 +112,13 @@ def decode(raw_data: str) -> events.Event:
     event_type = data["event_type"]
     try:
         codec = {item[0]: item[2] for item in CODECS}[event_type]
-    except KeyError as exc:
+    except KeyError as exc:  # pragma: no cover
         raise ValueError(f"unrecognised event type: {event_type!r}") from exc
 
     return codec.decode(data["payload"])
 
 
-def _xdg_state_home() -> Path:
+def _xdg_state_home() -> Path:  # pragma: no cover
     xdg_state_home = os.getenv("XDG_STATE_HOME")
     if xdg_state_home and os.path.isabs(xdg_state_home):
         return Path(xdg_state_home)

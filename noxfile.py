@@ -14,4 +14,6 @@ def lint(session: nox.Session) -> None:
 def test(session: nox.Session) -> None:
     """Run tests."""
     session.install("-r", "requirements-dev.txt")
-    session.run("pytest", "tests", *session.posargs)
+    session.run("coverage", "erase")
+    session.run("coverage", "run", "-m", "pytest", "tests", *session.posargs)
+    session.run("coverage", "report")

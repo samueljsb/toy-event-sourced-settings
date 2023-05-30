@@ -17,7 +17,7 @@ def current_settings(history: Iterable[events.Event]) -> dict[str, str]:
                 del settings[event.key]
             except KeyError:
                 pass
-        else:
+        else:  # pragma: no cover
             raise TypeError(f"unrecognised event type: {type(event)!r}")
 
     return settings
