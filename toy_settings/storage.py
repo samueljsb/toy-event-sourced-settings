@@ -2,13 +2,17 @@ from __future__ import annotations
 
 import abc
 
+from django.utils.module_loading import import_string
+
 from . import events
+
+DEFAULT_TOY_SETTINGS_REPOSITORY_PATH = (
+    "toy_settings.repositories.filesystem.FileSystemRepo"
+)
 
 
 def get_repository() -> Repository:
-    from toy_settings.repositories import filesystem
-
-    return filesystem.FileSystemRepo()
+    return import_string(DEFAULT_TOY_SETTINGS_REPOSITORY_PATH)()
 
 
 class Repository(abc.ABC):
