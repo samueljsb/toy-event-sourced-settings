@@ -14,6 +14,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from django.contrib.messages import constants as message_constants
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -68,6 +70,14 @@ TEMPLATES = [
         },
     },
 ]
+
+MESSAGE_TAGS = {
+    message_constants.DEBUG: "info",
+    message_constants.INFO: "primary",
+    message_constants.SUCCESS: "success",
+    message_constants.WARNING: "warning",
+    message_constants.ERROR: "danger",
+}
 
 WSGI_APPLICATION = "toy_settings.wsgi.application"
 
