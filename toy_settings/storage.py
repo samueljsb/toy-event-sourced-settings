@@ -52,15 +52,23 @@ class MemoryRepo(Repository):
         self.events.append(event)
 
     def events_for_key(self, key: str) -> list[events.Event]:
-        return [event for event in self.events if event.key == key]
+        return sorted(
+            (event for event in self.events if event.key == key),
+            key=lambda e: e.timestamp,
+        )
 
     # projections
 
     def current_value(self, key: str) -> str | None:
-        return projections.current_value(key, self.events)
+        return projections.current_value(key, self.events_for_key(key))
 
     def all_settings(self) -> dict[str, str]:
-        return projections.current_settings(self.events)
+        return projections.current_settings(
+            sorted(
+                self.events,
+                key=lambda e: e.timestamp,
+            )
+        )
 
 
 MEMORY_REPO = MemoryRepo()
@@ -176,7 +184,10 @@ class FileSystemRepo(Repository):
         file.write_text(encode(event))
 
     def events_for_key(self, key: str) -> list[events.Event]:
-        return [decode(file.read_text()) for file in self._dir(key).glob("*")]
+        return sorted(
+            (decode(file.read_text()) for file in self._dir(key).glob("*")),
+            key=lambda e: e.timestamp,
+        )
 
     # projections
 
@@ -184,7 +195,12 @@ class FileSystemRepo(Repository):
         return projections.current_value(key, self.events_for_key(key))
 
     def all_settings(self) -> dict[str, str]:
-        all_events = (
-            decode(file.read_text()) for file in self.root.rglob("*") if file.is_file()
+        all_events = sorted(
+            (
+                decode(file.read_text())
+                for file in self.root.rglob("*")
+                if file.is_file()
+            ),
+            key=lambda e: e.timestamp,
         )
         return projections.current_settings(all_events)
