@@ -6,6 +6,7 @@ from typing import Any
 from django import forms
 from django import http
 from django import urls
+from django.contrib import messages
 from django.http import HttpResponse
 from django.views import generic
 
@@ -77,10 +78,16 @@ class UnsetSetting(generic.RedirectView):
         self, request: http.HttpRequest, key: str, *args: Any, **kwargs: Any
     ) -> http.HttpResponse:
         toy_settings = services.ToySettings.new()
-        toy_settings.unset(
-            key,
-            timestamp=datetime.datetime.now(),
-            by="Some User",
-        )
+
+        try:
+            toy_settings.unset(
+                key,
+                timestamp=datetime.datetime.now(),
+                by="Some User",
+            )
+        except services.NotSet:
+            messages.error(request, f"there is no {key!r} setting to unset")
+        else:
+            messages.success(request, f"{key!r} unset")
 
         return super().post(request, *args, **kwargs)
