@@ -13,7 +13,7 @@
   <tr>
     <td><a href="{% url 'history' key %}">{{ key }}</a></td><td>{{ value }}</td>
     <td>
-      <a class="btn btn-primary" href="{% url 'set' %}?key={{ key }}&value={{ value }}">Edit</a>
+      <a class="btn btn-primary" href="{% url 'change' key %}">Edit</a>
       <form action="{% url 'unset' key %}" method="post" style="display: inline;">
         {% csrf_token %}
         <button type="submit" class="btn btn-danger">Unset</button>

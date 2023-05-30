@@ -81,6 +81,55 @@ class SetSetting(generic.FormView):
         return super().form_valid(form)
 
 
+class ChangeSettingForm(forms.Form):
+    key = forms.CharField(required=True, disabled=True)
+    value = forms.CharField(required=True)
+
+
+class ChangeSetting(generic.FormView):
+    template_name = "set_setting.html"
+    form_class = ChangeSettingForm
+    success_url = urls.reverse_lazy("settings")
+
+    def setup(
+        self, request: http.HttpRequest, *args: Any, key: str, **kwargs: Any
+    ) -> None:
+        self.key = key
+
+        return super().setup(request, *args, **kwargs)
+
+    def get_initial(self) -> dict[str, Any]:
+        initial = super().get_initial()
+
+        repo = storage.get_repository()
+        current_value = repo.current_value(self.key)
+
+        initial["key"] = self.key
+        initial["value"] = current_value
+
+        return initial
+
+    def form_valid(self, form: ChangeSetting) -> HttpResponse:
+        toy_settings = services.ToySettings.new()
+
+        key = toy_settings.normalize_key(form.cleaned_data["key"])
+        value = form.cleaned_data["value"]
+
+        try:
+            toy_settings.change(
+                key,
+                value,
+                timestamp=datetime.datetime.now(),
+                by="Some User",
+            )
+        except services.NotSet:
+            messages.error(self.request, f"there is no {key!r} setting to change")
+        else:
+            messages.success(self.request, f"{key!r} set to {value!r}")
+
+        return super().form_valid(form)
+
+
 class UnsetSetting(generic.RedirectView):
     url = urls.reverse_lazy("settings")
 
