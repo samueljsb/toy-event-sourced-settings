@@ -3,8 +3,8 @@ from __future__ import annotations
 import datetime
 import uuid
 
-from . import domain
 from . import events
+from . import projections
 from . import repositories
 
 
@@ -16,7 +16,7 @@ def set(
     by: str,
     repo: repositories.Repository,
 ) -> None:
-    key = domain.normalize_key(key)
+    key = projections.normalize_key(key)
     repo.record(
         events.Set(
             id=uuid.uuid4().hex,

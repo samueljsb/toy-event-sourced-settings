@@ -9,8 +9,8 @@ from typing import Any
 from typing import Generic
 from typing import TypeVar
 
-from . import domain
 from . import events
+from . import projections
 
 
 class Repository(abc.ABC):
@@ -42,10 +42,10 @@ class MemoryRepo(Repository):
         self.events.append(event)
 
     def current_value(self, key: str) -> str | None:
-        return domain.current_value(key, self.events)
+        return projections.current_value(key, self.events)
 
     def all_settings(self) -> dict[str, str]:
-        return domain.current_settings(self.events)
+        return projections.current_settings(self.events)
 
     def events_for_key(self, key: str) -> list[events.Event]:
         return [event for event in self.events if event.key == key]
@@ -164,13 +164,13 @@ class FileSystemRepo(Repository):
         file.write_text(encode(event))
 
     def current_value(self, key: str) -> str | None:
-        return domain.current_value(key, self.events_for_key(key))
+        return projections.current_value(key, self.events_for_key(key))
 
     def all_settings(self) -> dict[str, str]:
         all_events = (
             decode(file.read_text()) for file in self.root.rglob("*") if file.is_file()
         )
-        return domain.current_settings(all_events)
+        return projections.current_settings(all_events)
 
     def events_for_key(self, key: str) -> list[events.Event]:
         return [decode(file.read_text()) for file in self._dir(key).glob("*")]
