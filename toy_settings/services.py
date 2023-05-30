@@ -6,7 +6,13 @@ import uuid
 import attrs
 
 from . import events
+from . import projections
 from . import storage
+
+
+@attrs.frozen
+class NotSet(Exception):
+    key: str
 
 
 @attrs.frozen
@@ -48,6 +54,17 @@ class ToySettings:
         timestamp: datetime.datetime,
         by: str,
     ) -> None:
+        """
+        Unset a setting.
+
+        Raises:
+            NotSet: There is no setting for this key.
+        """
+        history = self.repo.events_for_key(key)
+        current_value = projections.current_value(key, history)
+        if current_value is None:
+            raise NotSet(key)
+
         self.repo.record(
             events.Unset(
                 id=uuid.uuid4().hex,

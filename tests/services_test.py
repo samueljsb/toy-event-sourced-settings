@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import datetime
 
+import pytest
+
 from toy_settings import events
 from toy_settings import services
 from toy_settings.repositories.memory import MemoryRepo
@@ -58,16 +60,15 @@ def test_unset_already_unset():
     )
     toy_settings = services.ToySettings(repo=repo)
 
-    # check doing it twice has no effect
-    toy_settings.unset("FOO", timestamp=datetime.datetime.now(), by="me")
-
-    assert repo.all_settings() == {}
+    # check we are not allowed to unset it again
+    with pytest.raises(services.NotSet):
+        toy_settings.unset("FOO", timestamp=datetime.datetime.now(), by="me")
 
 
 def test_unset_never_set():
     repo = MemoryRepo([])
     toy_settings = services.ToySettings(repo=repo)
 
-    toy_settings.unset("FOO", timestamp=datetime.datetime.now(), by="me")
-
-    assert repo.all_settings() == {}
+    # check we are not allowed to unset it again
+    with pytest.raises(services.NotSet):
+        toy_settings.unset("FOO", timestamp=datetime.datetime.now(), by="me")
