@@ -20,18 +20,24 @@ def get_repository() -> Repository:
 class Repository(abc.ABC):
     @abc.abstractmethod
     def record(self, event: events.Event) -> None:
-        ...
-
-    @abc.abstractmethod
-    def current_value(self, key: str) -> str | None:
-        ...
-
-    @abc.abstractmethod
-    def all_settings(self) -> dict[str, str]:
+        """Record a new event."""
         ...
 
     @abc.abstractmethod
     def events_for_key(self, key: str) -> list[events.Event]:
+        """Retrieve the events for this key in chronological order."""
+        ...
+
+    # projections
+
+    @abc.abstractmethod
+    def current_value(self, key: str) -> str | None:
+        """Get the current value of a setting."""
+        ...
+
+    @abc.abstractmethod
+    def all_settings(self) -> dict[str, str]:
+        """Get the current value of all settings."""
         ...
 
 
@@ -45,14 +51,16 @@ class MemoryRepo(Repository):
     def record(self, event: events.Event) -> None:
         self.events.append(event)
 
+    def events_for_key(self, key: str) -> list[events.Event]:
+        return [event for event in self.events if event.key == key]
+
+    # projections
+
     def current_value(self, key: str) -> str | None:
         return projections.current_value(key, self.events)
 
     def all_settings(self) -> dict[str, str]:
         return projections.current_settings(self.events)
-
-    def events_for_key(self, key: str) -> list[events.Event]:
-        return [event for event in self.events if event.key == key]
 
 
 MEMORY_REPO = MemoryRepo()
@@ -167,6 +175,11 @@ class FileSystemRepo(Repository):
         file.touch()
         file.write_text(encode(event))
 
+    def events_for_key(self, key: str) -> list[events.Event]:
+        return [decode(file.read_text()) for file in self._dir(key).glob("*")]
+
+    # projections
+
     def current_value(self, key: str) -> str | None:
         return projections.current_value(key, self.events_for_key(key))
 
@@ -175,6 +188,3 @@ class FileSystemRepo(Repository):
             decode(file.read_text()) for file in self.root.rglob("*") if file.is_file()
         )
         return projections.current_settings(all_events)
-
-    def events_for_key(self, key: str) -> list[events.Event]:
-        return [decode(file.read_text()) for file in self._dir(key).glob("*")]
