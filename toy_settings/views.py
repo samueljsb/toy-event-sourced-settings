@@ -42,14 +42,14 @@ class SettingHistory(generic.TemplateView):
         return context
 
 
-class SettingForm(forms.Form):
+class NewSettingForm(forms.Form):
     key = forms.CharField(required=True)
     value = forms.CharField(required=True)
 
 
 class SetSetting(generic.FormView):
     template_name = "set_setting.html"
-    form_class = SettingForm
+    form_class = NewSettingForm
     success_url = urls.reverse_lazy("settings")
 
     def get_initial(self) -> dict[str, Any]:
@@ -60,7 +60,7 @@ class SetSetting(generic.FormView):
 
         return initial
 
-    def form_valid(self, form: SettingForm) -> HttpResponse:
+    def form_valid(self, form: NewSettingForm) -> HttpResponse:
         toy_settings = services.ToySettings.new()
 
         key = toy_settings.normalize_key(form.cleaned_data["key"])
