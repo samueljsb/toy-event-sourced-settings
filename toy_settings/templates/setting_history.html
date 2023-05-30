@@ -14,7 +14,7 @@ Current value: {{ value }}
   {% for event in events %}
     <tr>
       <td>{{ event.timestamp }}</td>
-      <td>{{ event.value }}</td>
+      <td>{{ event.value }}{{ event.new_value }}</td>
       <td>{{ event.by }}</td>
     </tr>
   {% endfor %}

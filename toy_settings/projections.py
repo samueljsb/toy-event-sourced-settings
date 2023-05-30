@@ -10,6 +10,8 @@ def current_settings(history: Iterable[events.Event]) -> dict[str, str]:
     for event in sorted(history, key=lambda e: e.timestamp):
         if isinstance(event, events.Set):
             settings[event.key] = event.value
+        elif isinstance(event, events.Changed):
+            settings[event.key] = event.new_value
         elif isinstance(event, events.Unset):
             try:
                 del settings[event.key]
@@ -33,5 +35,7 @@ def current_value(key: str, history: Iterable[events.Event]) -> str | None:
 
     if isinstance(last_event, events.Set):
         return last_event.value
+    elif isinstance(last_event, events.Changed):
+        return last_event.new_value
     else:
         return None

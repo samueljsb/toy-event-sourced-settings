@@ -21,5 +21,10 @@ class Set(Event):
 
 
 @attrs.frozen
+class Changed(Event):
+    new_value: str
+
+
+@attrs.frozen
 class Unset(Event):
     pass

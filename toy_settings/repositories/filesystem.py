@@ -46,6 +46,26 @@ class SetCodec(Codec[events.Set]):
         )
 
 
+class ChangedCodec(Codec[events.Changed]):
+    def encode(self, event: events.Changed) -> dict[str, str]:
+        return {
+            "id": event.id,
+            "timestamp": event.timestamp.isoformat(),
+            "by": event.by,
+            "key": event.key,
+            "new_value": event.new_value,
+        }
+
+    def decode(self, payload: dict[str, str]) -> events.Changed:
+        return events.Changed(
+            id=payload["id"],
+            timestamp=datetime.datetime.fromisoformat(payload["timestamp"]),
+            by=payload["by"],
+            key=payload["key"],
+            new_value=payload["new_value"],
+        )
+
+
 class UnsetCodec(Codec[events.Unset]):
     def encode(self, event: events.Unset) -> dict[str, str]:
         return {
@@ -66,6 +86,7 @@ class UnsetCodec(Codec[events.Unset]):
 
 CODECS: tuple[tuple[str, type[events.Event], Codec[Any]], ...] = (
     ("set", events.Set, SetCodec()),
+    ("changed", events.Changed, ChangedCodec()),
     ("unset", events.Unset, UnsetCodec()),
 )
 
