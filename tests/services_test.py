@@ -2,7 +2,7 @@ import datetime
 
 from toy_settings import events
 from toy_settings import services
-from toy_settings.storage import MemoryRepo
+from toy_settings.repositories.memory import MemoryRepo
 
 
 def _set_event(key: str, value: str, id: str) -> events.Set:
