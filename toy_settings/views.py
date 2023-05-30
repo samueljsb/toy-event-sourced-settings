@@ -66,12 +66,18 @@ class SetSetting(generic.FormView):
         key = toy_settings.normalize_key(form.cleaned_data["key"])
         value = form.cleaned_data["value"]
 
-        toy_settings.set(
-            key,
-            value,
-            timestamp=datetime.datetime.now(),
-            by="Some User",
-        )
+        try:
+            toy_settings.set(
+                key,
+                value,
+                timestamp=datetime.datetime.now(),
+                by="Some User",
+            )
+        except services.AlreadySet:
+            messages.error(self.request, f"{key!r} is already set")
+        else:
+            messages.success(self.request, f"{key!r} set to {value!r}")
+
         return super().form_valid(form)
 
 
