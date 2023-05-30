@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from toy_settings import events
 from toy_settings import projections
 from toy_settings import storage
