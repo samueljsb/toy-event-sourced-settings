@@ -11,6 +11,11 @@ from . import storage
 
 
 @attrs.frozen
+class AlreadySet(Exception):
+    key: str
+
+
+@attrs.frozen
 class NotSet(Exception):
     key: str
 
@@ -36,7 +41,19 @@ class ToySettings:
         timestamp: datetime.datetime,
         by: str,
     ) -> None:
+        """
+        Create a new setting.
+
+        Raises:
+            AlreadySet: The setting already exists.
+        """
         key = self._normalize_key(key)
+
+        history = self.repo.events_for_key(key)
+        current_value = projections.current_value(key, history)
+        if current_value is not None:
+            raise AlreadySet(key)
+
         self.repo.record(
             events.Set(
                 id=uuid.uuid4().hex,

@@ -19,23 +19,25 @@ def _unset_event(key: str, id: str) -> events.Unset:
     return events.Unset(id=id, timestamp=datetime.datetime.now(), by="me", key=key)
 
 
-def test_set_normalizes_key():
-    repo = MemoryRepo()
-    toy_settings = services.ToySettings(repo=repo)
-
-    toy_settings.set("foo", "42", timestamp=datetime.datetime.now(), by="me")
-
-    assert repo.all_settings() == {"FOO": "42"}
-
-
-def test_set_updates_value():
+def test_set():
     repo = MemoryRepo()
     toy_settings = services.ToySettings(repo=repo)
 
     toy_settings.set("FOO", "42", timestamp=datetime.datetime.now(), by="me")
-    toy_settings.set("foo", "43", timestamp=datetime.datetime.now(), by="me")
 
-    assert repo.all_settings() == {"FOO": "43"}
+    assert repo.all_settings() == {"FOO": "42"}
+
+
+def test_set_cannot_update_value():
+    repo = MemoryRepo()
+    toy_settings = services.ToySettings(repo=repo)
+
+    toy_settings.set("FOO", "42", timestamp=datetime.datetime.now(), by="me")
+
+    with pytest.raises(services.AlreadySet):
+        toy_settings.set("FOO", "43", timestamp=datetime.datetime.now(), by="me")
+
+    assert repo.all_settings() == {"FOO": "42"}
 
 
 def test_unset_removes_value():
