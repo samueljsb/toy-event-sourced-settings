@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import contextlib
 import datetime
 from typing import Any
+from typing import Generator
 
 from django import forms
 from django import http
@@ -9,9 +11,24 @@ from django import urls
 from django.contrib import messages
 from django.http import HttpResponse
 from django.views import generic
+from tenacity import Retrying
+from tenacity import retry_if_exception_type
+from tenacity import wait_random_exponential
 
 from . import services
 from . import storage
+
+
+# NOTE: this concern should usually live in the service layer with units of work, but we
+# don't have any here (yet?)
+@contextlib.contextmanager
+def retry(max_wait_seconds: int) -> Generator[None, None, None]:
+    for attempt in Retrying(
+        retry=retry_if_exception_type(storage.StaleState),
+        wait=wait_random_exponential(multiplier=0.1, max=max_wait_seconds),
+    ):
+        with attempt:
+            yield
 
 
 class Settings(generic.TemplateView):
@@ -67,12 +84,13 @@ class SetSetting(generic.FormView):
         value = form.cleaned_data["value"]
 
         try:
-            toy_settings.set(
-                key,
-                value,
-                timestamp=datetime.datetime.now(),
-                by="Some User",
-            )
+            with retry(5):
+                toy_settings.set(
+                    key,
+                    value,
+                    timestamp=datetime.datetime.now(),
+                    by="Some User",
+                )
         except services.AlreadySet:
             messages.error(self.request, f"{key!r} is already set")
         else:
@@ -116,12 +134,13 @@ class ChangeSetting(generic.FormView):
         value = form.cleaned_data["value"]
 
         try:
-            toy_settings.change(
-                key,
-                value,
-                timestamp=datetime.datetime.now(),
-                by="Some User",
-            )
+            with retry(10):
+                toy_settings.change(
+                    key,
+                    value,
+                    timestamp=datetime.datetime.now(),
+                    by="Some User",
+                )
         except services.NotSet:
             messages.error(self.request, f"there is no {key!r} setting to change")
         else:
@@ -139,11 +158,12 @@ class UnsetSetting(generic.RedirectView):
         toy_settings = services.ToySettings.new()
 
         try:
-            toy_settings.unset(
-                key,
-                timestamp=datetime.datetime.now(),
-                by="Some User",
-            )
+            with retry(10):
+                toy_settings.unset(
+                    key,
+                    timestamp=datetime.datetime.now(),
+                    by="Some User",
+                )
         except services.NotSet:
             messages.error(request, f"there is no {key!r} setting to unset")
         else:
