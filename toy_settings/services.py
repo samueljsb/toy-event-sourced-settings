@@ -6,7 +6,6 @@ import uuid
 import attrs
 
 from . import events
-from . import projections
 from . import storage
 
 
@@ -47,8 +46,7 @@ class ToySettings:
         Raises:
             AlreadySet: The setting already exists.
         """
-        history = self.repo.events_for_key(key)
-        current_value = projections.current_value(key, history)
+        current_value = self.repo.current_value(key)
         if current_value is not None:
             raise AlreadySet(key)
 
@@ -76,8 +74,7 @@ class ToySettings:
         Raises:
             NotSet: There is no setting for this key.
         """
-        history = self.repo.events_for_key(key)
-        current_value = projections.current_value(key, history)
+        current_value = self.repo.current_value(key)
         if current_value is None:
             raise NotSet(key)
 
@@ -104,8 +101,7 @@ class ToySettings:
         Raises:
             NotSet: There is no setting for this key.
         """
-        history = self.repo.events_for_key(key)
-        current_value = projections.current_value(key, history)
+        current_value = self.repo.current_value(key)
         if current_value is None:
             raise NotSet(key)
 
