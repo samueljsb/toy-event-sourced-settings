@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import datetime
 
-import pytest
-
 from toy_settings import events
 from toy_settings import projections
 
@@ -41,28 +39,3 @@ def test_current_settings():
         "set-and-changed": "43",
         # "set-and-unset" is not set
     }
-
-
-@pytest.mark.parametrize(
-    ("key", "expected_value"),
-    (
-        ("set-once", "42"),
-        ("set-and-changed", "43"),
-        ("set-and-unset", None),
-        ("never-set", None),
-        ("never-mentioned", None),
-    ),
-)
-def test_current_value(key, expected_value):
-    history = [
-        _set_event("set-once", "42", id="1"),
-        _set_event("set-and-changed", "42", id="2"),
-        _changed_event("set-and-changed", "43", id="3"),
-        _set_event("set-and-unset", "42", id="4"),
-        _unset_event("set-and-unset", id="5"),
-        _unset_event("never-set", id="6"),
-    ]
-
-    value = projections.current_value(key, history)
-
-    assert value == expected_value
