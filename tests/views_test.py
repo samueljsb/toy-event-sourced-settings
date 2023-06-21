@@ -29,7 +29,6 @@ def test_setting_history(django_app: DjangoTestApp):
     repo = storage.get_repository()
     repo.record(
         events.Set(
-            id="1",
             timestamp=datetime.datetime.now(),
             by="Some user",
             key="FOO",

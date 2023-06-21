@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime
-import uuid
 
 import attrs
 
@@ -52,7 +51,6 @@ class ToySettings:
 
         self.repo.record(
             events.Set(
-                id=uuid.uuid4().hex,
                 timestamp=timestamp,
                 by=by,
                 key=key,
@@ -80,7 +78,6 @@ class ToySettings:
 
         self.repo.record(
             events.Changed(
-                id=uuid.uuid4().hex,
                 timestamp=timestamp,
                 by=by,
                 key=key,
@@ -107,7 +104,6 @@ class ToySettings:
 
         self.repo.record(
             events.Unset(
-                id=uuid.uuid4().hex,
                 timestamp=timestamp,
                 by=by,
                 key=key,

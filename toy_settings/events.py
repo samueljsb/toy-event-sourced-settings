@@ -8,7 +8,6 @@ import attrs
 
 @attrs.frozen
 class Event(abc.ABC):
-    id: str
     timestamp: datetime.datetime
     by: str
 

@@ -9,14 +9,12 @@ from toy_settings import services
 from toy_settings.repositories.memory import MemoryRepo
 
 
-def _set_event(key: str, value: str, id: str) -> events.Set:
-    return events.Set(
-        id=id, timestamp=datetime.datetime.now(), by="me", key=key, value=value
-    )
+def _set_event(key: str, value: str) -> events.Set:
+    return events.Set(timestamp=datetime.datetime.now(), by="me", key=key, value=value)
 
 
-def _unset_event(key: str, id: str) -> events.Unset:
-    return events.Unset(id=id, timestamp=datetime.datetime.now(), by="me", key=key)
+def _unset_event(key: str) -> events.Unset:
+    return events.Unset(timestamp=datetime.datetime.now(), by="me", key=key)
 
 
 def test_set():
@@ -62,8 +60,8 @@ def test_cannot_change_non_existent_setting():
 def test_cannot_change_unset_setting():
     repo = MemoryRepo(
         [
-            _set_event("FOO", "42", id="1"),
-            _unset_event("FOO", id="2"),
+            _set_event("FOO", "42"),
+            _unset_event("FOO"),
         ]
     )
     toy_settings = services.ToySettings(repo=repo)
@@ -76,7 +74,7 @@ def test_cannot_change_unset_setting():
 def test_unset_removes_value():
     repo = MemoryRepo(
         [
-            _set_event("FOO", "42", id="1"),
+            _set_event("FOO", "42"),
         ]
     )
     toy_settings = services.ToySettings(repo=repo)
@@ -89,8 +87,8 @@ def test_unset_removes_value():
 def test_unset_already_unset():
     repo = MemoryRepo(
         [
-            _set_event("FOO", "42", id="1"),
-            _unset_event("FOO", id="2"),
+            _set_event("FOO", "42"),
+            _unset_event("FOO"),
         ]
     )
     toy_settings = services.ToySettings(repo=repo)

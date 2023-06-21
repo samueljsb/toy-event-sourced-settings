@@ -6,30 +6,28 @@ from toy_settings import events
 from toy_settings import projections
 
 
-def _set_event(key: str, value: str, id: str) -> events.Set:
-    return events.Set(
-        id=id, timestamp=datetime.datetime.now(), by="me", key=key, value=value
-    )
+def _set_event(key: str, value: str) -> events.Set:
+    return events.Set(timestamp=datetime.datetime.now(), by="me", key=key, value=value)
 
 
-def _changed_event(key: str, new_value: str, id: str) -> events.Changed:
+def _changed_event(key: str, new_value: str) -> events.Changed:
     return events.Changed(
-        id=id, timestamp=datetime.datetime.now(), by="me", key=key, new_value=new_value
+        timestamp=datetime.datetime.now(), by="me", key=key, new_value=new_value
     )
 
 
-def _unset_event(key: str, id: str) -> events.Unset:
-    return events.Unset(id=id, timestamp=datetime.datetime.now(), by="me", key=key)
+def _unset_event(key: str) -> events.Unset:
+    return events.Unset(timestamp=datetime.datetime.now(), by="me", key=key)
 
 
 def test_current_settings():
     history = [
-        _set_event("set-once", "42", id="1"),
-        _set_event("set-and-changed", "42", id="2"),
-        _changed_event("set-and-changed", "43", id="3"),
-        _set_event("set-and-unset", "42", id="4"),
-        _unset_event("set-and-unset", id="5"),
-        _unset_event("never-set", id="6"),  # handles unexpected key
+        _set_event("set-once", "42"),
+        _set_event("set-and-changed", "42"),
+        _changed_event("set-and-changed", "43"),
+        _set_event("set-and-unset", "42"),
+        _unset_event("set-and-unset"),
+        _unset_event("never-set"),  # handles unexpected key
     ]
 
     settings = projections.current_settings(history)

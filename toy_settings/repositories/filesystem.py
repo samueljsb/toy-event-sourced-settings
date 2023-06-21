@@ -29,7 +29,6 @@ class Codec(abc.ABC, Generic[_TEvent]):
 class SetCodec(Codec[events.Set]):
     def encode(self, event: events.Set) -> dict[str, str]:
         return {
-            "id": event.id,
             "timestamp": event.timestamp.isoformat(),
             "by": event.by,
             "key": event.key,
@@ -38,7 +37,6 @@ class SetCodec(Codec[events.Set]):
 
     def decode(self, payload: dict[str, str]) -> events.Set:
         return events.Set(
-            id=payload["id"],
             timestamp=datetime.datetime.fromisoformat(payload["timestamp"]),
             by=payload["by"],
             key=payload["key"],
@@ -49,7 +47,6 @@ class SetCodec(Codec[events.Set]):
 class ChangedCodec(Codec[events.Changed]):
     def encode(self, event: events.Changed) -> dict[str, str]:
         return {
-            "id": event.id,
             "timestamp": event.timestamp.isoformat(),
             "by": event.by,
             "key": event.key,
@@ -58,7 +55,6 @@ class ChangedCodec(Codec[events.Changed]):
 
     def decode(self, payload: dict[str, str]) -> events.Changed:
         return events.Changed(
-            id=payload["id"],
             timestamp=datetime.datetime.fromisoformat(payload["timestamp"]),
             by=payload["by"],
             key=payload["key"],
@@ -69,7 +65,6 @@ class ChangedCodec(Codec[events.Changed]):
 class UnsetCodec(Codec[events.Unset]):
     def encode(self, event: events.Unset) -> dict[str, str]:
         return {
-            "id": event.id,
             "timestamp": event.timestamp.isoformat(),
             "by": event.by,
             "key": event.key,
@@ -77,7 +72,6 @@ class UnsetCodec(Codec[events.Unset]):
 
     def decode(self, payload: dict[str, str]) -> events.Unset:
         return events.Unset(
-            id=payload["id"],
             timestamp=datetime.datetime.fromisoformat(payload["timestamp"]),
             by=payload["by"],
             key=payload["key"],
@@ -137,7 +131,7 @@ class FileSystemRepo(storage.Repository):
         return dir
 
     def record(self, event: events.Event) -> None:
-        file = self._dir(event.key) / event.id
+        file = self._dir(event.key) / event.timestamp.isoformat()
         file.touch()
         file.write_text(encode(event))
 
