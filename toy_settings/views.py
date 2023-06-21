@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import json
 from typing import Any
 from typing import Generator
 
@@ -42,6 +43,13 @@ class Settings(generic.TemplateView):
         context["settings"] = sorted(settings.items())
 
         return context
+
+
+class SettingsJson(generic.View):
+    def get(self, request: http.HttpRequest) -> http.HttpResponse:
+        repo = storage.get_repository()
+        settings = repo.all_settings()
+        return http.HttpResponse(json.dumps(settings))
 
 
 class SettingHistory(generic.TemplateView):

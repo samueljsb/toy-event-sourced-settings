@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import unittest.mock
 
@@ -49,6 +50,20 @@ def _set_setting(
     form["key"] = key
     form["value"] = value
     return form.submit()
+
+
+def test_settings_json(django_app: DjangoTestApp):
+    _set_setting(django_app, "FOO", "42")
+    _set_setting(django_app, "BAR", "something")
+    _set_setting(django_app, "BAZ", "something else")
+
+    response = django_app.get("/json/")
+
+    assert json.loads(response.body) == {
+        "FOO": "42",
+        "BAR": "something",
+        "BAZ": "something else",
+    }
 
 
 def test_set_new_setting(django_app: DjangoTestApp):
