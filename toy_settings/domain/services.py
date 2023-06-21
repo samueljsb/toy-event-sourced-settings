@@ -22,12 +22,6 @@ class NotSet(Exception):
 class ToySettings:
     repo: storage.Repository
 
-    @classmethod
-    def new(cls) -> ToySettings:
-        return cls(
-            repo=storage.get_repository(),
-        )
-
     def set(
         self,
         key: str,
