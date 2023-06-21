@@ -150,7 +150,7 @@ class FileSystemRepo(storage.Repository):
     # projections
 
     def current_value(self, key: str) -> str | None:
-        return projections.current_value(key, self.events_for_key(key))
+        return self.all_settings().get(key, None)
 
     def all_settings(self) -> dict[str, str]:
         all_events = sorted(
