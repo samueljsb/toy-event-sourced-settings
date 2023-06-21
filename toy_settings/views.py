@@ -16,8 +16,8 @@ from tenacity import Retrying
 from tenacity import retry_if_exception_type
 from tenacity import wait_random_exponential
 
-from . import services
-from . import storage
+from .domain import services
+from .domain import storage
 
 
 # NOTE: this concern should usually live in the service layer with units of work, but we

@@ -4,8 +4,8 @@ import datetime
 
 import pytest
 
-from toy_settings import events
-from toy_settings import services
+from toy_settings.domain import events
+from toy_settings.domain import services
 from toy_settings.repositories.memory import MemoryRepo
 
 

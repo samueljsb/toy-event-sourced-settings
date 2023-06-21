@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import datetime
 
-from toy_settings import events
-from toy_settings import projections
+from toy_settings.domain import events
+from toy_settings.domain import projections
 
 
 def _set_event(key: str, value: str) -> events.Set:

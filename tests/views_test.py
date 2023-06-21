@@ -9,8 +9,8 @@ from django.utils import timezone
 from django_webtest import DjangoTestApp
 from django_webtest import DjangoWebtestResponse
 
-from toy_settings import events
-from toy_settings import storage
+from toy_settings.domain import events
+from toy_settings.domain import storage
 
 pytestmark = pytest.mark.django_db
 

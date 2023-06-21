@@ -5,9 +5,9 @@ import json
 import cattrs.preconf.json
 from django.db.models import Q
 
-from toy_settings import events
-from toy_settings import projections
-from toy_settings import storage
+from toy_settings.domain import events
+from toy_settings.domain import projections
+from toy_settings.domain import storage
 
 from . import models
 
