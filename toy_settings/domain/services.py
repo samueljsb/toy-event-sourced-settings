@@ -28,9 +28,6 @@ class ToySettings:
             repo=storage.get_repository(),
         )
 
-    def normalize_key(self, key: str) -> str:
-        return key.strip().replace(" ", "_").replace("-", "_").upper()
-
     def set(
         self,
         key: str,

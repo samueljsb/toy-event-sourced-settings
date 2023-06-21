@@ -32,6 +32,10 @@ def retry(max_wait_seconds: int) -> Generator[None, None, None]:
             yield
 
 
+def normalize_key(key: str) -> str:
+    return key.strip().replace(" ", "_").replace("-", "_").upper()
+
+
 class Settings(generic.TemplateView):
     template_name = "settings.html"
 
@@ -88,7 +92,7 @@ class SetSetting(generic.FormView):
     def form_valid(self, form: NewSettingForm) -> HttpResponse:
         toy_settings = services.ToySettings.new()
 
-        key = toy_settings.normalize_key(form.cleaned_data["key"])
+        key = normalize_key(form.cleaned_data["key"])
         value = form.cleaned_data["value"]
 
         try:
@@ -138,7 +142,7 @@ class ChangeSetting(generic.FormView):
     def form_valid(self, form: ChangeSetting) -> HttpResponse:
         toy_settings = services.ToySettings.new()
 
-        key = toy_settings.normalize_key(form.cleaned_data["key"])
+        key = normalize_key(form.cleaned_data["key"])
         value = form.cleaned_data["value"]
 
         try:
