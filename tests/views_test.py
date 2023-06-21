@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import datetime
 import os
 import unittest.mock
 
 import pytest
+from django.utils import timezone
 from django_webtest import DjangoTestApp
 from django_webtest import DjangoWebtestResponse
 
@@ -29,7 +29,7 @@ def test_setting_history(django_app: DjangoTestApp):
     repo = storage.get_repository()
     repo.record(
         events.Set(
-            timestamp=datetime.datetime.now(),
+            timestamp=timezone.now(),
             by="Some user",
             key="FOO",
             value="42",

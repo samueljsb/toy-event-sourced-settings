@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import contextlib
-import datetime
 from typing import Any
 from typing import Generator
 
@@ -10,6 +9,7 @@ from django import http
 from django import urls
 from django.contrib import messages
 from django.http import HttpResponse
+from django.utils import timezone
 from django.views import generic
 from tenacity import Retrying
 from tenacity import retry_if_exception_type
@@ -88,7 +88,7 @@ class SetSetting(generic.FormView):
                 toy_settings.set(
                     key,
                     value,
-                    timestamp=datetime.datetime.now(),
+                    timestamp=timezone.now(),
                     by="Some User",
                 )
         except services.AlreadySet:
@@ -138,7 +138,7 @@ class ChangeSetting(generic.FormView):
                 toy_settings.change(
                     key,
                     value,
-                    timestamp=datetime.datetime.now(),
+                    timestamp=timezone.now(),
                     by="Some User",
                 )
         except services.NotSet:
@@ -161,7 +161,7 @@ class UnsetSetting(generic.RedirectView):
             with retry(10):
                 toy_settings.unset(
                     key,
-                    timestamp=datetime.datetime.now(),
+                    timestamp=timezone.now(),
                     by="Some User",
                 )
         except services.NotSet:
