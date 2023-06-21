@@ -11,6 +11,8 @@ from django_webtest import DjangoWebtestResponse
 from toy_settings import events
 from toy_settings import storage
 
+pytestmark = pytest.mark.django_db
+
 
 @pytest.fixture(autouse=True)
 def temp_file_storage(tmp_path):

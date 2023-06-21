@@ -7,7 +7,7 @@ from django.utils.module_loading import import_string
 from . import events
 
 DEFAULT_TOY_SETTINGS_REPOSITORY_PATH = (
-    "toy_settings.repositories.filesystem.FileSystemRepo"
+    "toy_settings.repositories.django.repo.DjangoRepo"
 )
 
 
