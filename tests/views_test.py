@@ -12,7 +12,7 @@ from django_webtest import DjangoWebtestResponse
 from toy_settings.domain import events
 from toy_settings.domain import storage
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db(transaction=True)
 
 
 @pytest.fixture(autouse=True)

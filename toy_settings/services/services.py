@@ -12,6 +12,8 @@ from tenacity import wait_random_exponential
 from toy_settings.domain import services
 from toy_settings.domain import storage
 
+from . import unit_of_work
+
 
 @attrs.frozen
 class AlreadySet(Exception):
@@ -25,13 +27,13 @@ class NotSet(Exception):
 
 @attrs.frozen
 class ToySettings:
-    repo: storage.Repository
+    uow: unit_of_work.UnitOfWork
     max_wait_seconds: int
 
     @classmethod
     def new(cls, max_wait_seconds: int = 0) -> ToySettings:
         return cls(
-            repo=storage.get_repository(),
+            uow=unit_of_work.get_uow(),
             max_wait_seconds=max_wait_seconds,
         )
 
@@ -58,17 +60,18 @@ class ToySettings:
         Raises:
             AlreadySet: The setting already exists.
         """
-        domain = services.ToySettings(repo=self.repo)
-        with self.retry():
-            try:
+        domain = services.ToySettings(repo=self.uow.repo)
+        try:
+            with self.uow as uow, self.retry():
                 domain.set(
                     key,
                     value,
                     timestamp=timestamp,
                     by=by,
                 )
-            except services.AlreadySet as exc:
-                raise AlreadySet(key) from exc
+                uow.commit()
+        except services.AlreadySet as exc:
+            raise AlreadySet(key) from exc
 
     def change(
         self,
@@ -84,17 +87,18 @@ class ToySettings:
         Raises:
             NotSet: There is no setting for this key.
         """
-        domain = services.ToySettings(repo=self.repo)
-        with self.retry():
-            try:
+        domain = services.ToySettings(repo=self.uow.repo)
+        try:
+            with self.uow as uow, self.retry():
                 domain.change(
                     key,
                     new_value,
                     timestamp=timestamp,
                     by=by,
                 )
-            except services.NotSet as exc:
-                raise NotSet(key) from exc
+                uow.commit()
+        except services.NotSet as exc:
+            raise NotSet(key) from exc
 
     def unset(
         self,
@@ -109,13 +113,14 @@ class ToySettings:
         Raises:
             NotSet: There is no setting for this key.
         """
-        domain = services.ToySettings(repo=self.repo)
-        with self.retry():
-            try:
+        domain = services.ToySettings(repo=self.uow.repo)
+        try:
+            with self.uow as uow, self.retry():
                 domain.unset(
                     key,
                     timestamp=timestamp,
                     by=by,
                 )
-            except services.NotSet as exc:
-                raise NotSet(key) from exc
+                uow.commit()
+        except services.NotSet as exc:
+            raise NotSet(key) from exc
