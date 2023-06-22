@@ -62,7 +62,7 @@ class ToySettings:
         """
         domain = services.ToySettings(state=self.uow.repo)
         try:
-            with self.uow as uow, self.retry():
+            with self.retry(), self.uow as uow:
                 new_events = domain.set(
                     key,
                     value,
@@ -91,7 +91,7 @@ class ToySettings:
         """
         domain = services.ToySettings(state=self.uow.repo)
         try:
-            with self.uow as uow, self.retry():
+            with self.retry(), self.uow as uow:
                 new_events = domain.change(
                     key,
                     new_value,
@@ -119,7 +119,7 @@ class ToySettings:
         """
         domain = services.ToySettings(state=self.uow.repo)
         try:
-            with self.uow as uow, self.retry():
+            with self.retry(), self.uow as uow:
                 new_events = domain.unset(
                     key,
                     timestamp=timestamp,
