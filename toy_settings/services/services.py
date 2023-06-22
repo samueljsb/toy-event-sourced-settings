@@ -61,19 +61,20 @@ class ToySettings:
             AlreadySet: The setting already exists.
         """
         domain = services.ToySettings(state=self.uow.repo)
-        try:
-            with self.retry(), self.uow as uow:
+        with self.retry(), self.uow as uow:
+            try:
                 new_events = domain.set(
                     key,
                     value,
                     timestamp=timestamp,
                     by=by,
                 )
-                for event in new_events:
-                    self.uow.repo.record(event)
-                uow.commit()
-        except services.AlreadySet as exc:
-            raise AlreadySet(key) from exc
+            except services.AlreadySet as exc:
+                raise AlreadySet(key) from exc
+
+            for event in new_events:
+                self.uow.repo.record(event)
+            uow.commit()
 
     def change(
         self,
@@ -90,19 +91,20 @@ class ToySettings:
             NotSet: There is no setting for this key.
         """
         domain = services.ToySettings(state=self.uow.repo)
-        try:
-            with self.retry(), self.uow as uow:
+        with self.retry(), self.uow as uow:
+            try:
                 new_events = domain.change(
                     key,
                     new_value,
                     timestamp=timestamp,
                     by=by,
                 )
-                for event in new_events:
-                    self.uow.repo.record(event)
-                uow.commit()
-        except services.NotSet as exc:
-            raise NotSet(key) from exc
+            except services.NotSet as exc:
+                raise NotSet(key) from exc
+
+            for event in new_events:
+                self.uow.repo.record(event)
+            uow.commit()
 
     def unset(
         self,
@@ -118,15 +120,16 @@ class ToySettings:
             NotSet: There is no setting for this key.
         """
         domain = services.ToySettings(state=self.uow.repo)
-        try:
-            with self.retry(), self.uow as uow:
+        with self.retry(), self.uow as uow:
+            try:
                 new_events = domain.unset(
                     key,
                     timestamp=timestamp,
                     by=by,
                 )
-                for event in new_events:
-                    self.uow.repo.record(event)
-                uow.commit()
-        except services.NotSet as exc:
-            raise NotSet(key) from exc
+            except services.NotSet as exc:
+                raise NotSet(key) from exc
+
+            for event in new_events:
+                self.uow.repo.record(event)
+            uow.commit()
