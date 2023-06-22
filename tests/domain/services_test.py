@@ -19,10 +19,12 @@ def test_set():
 
 
 def test_set_cannot_update_value():
-    repo = MemoryRepo()
+    repo = MemoryRepo(
+        [
+            factories.Set(key="FOO", value="42"),
+        ]
+    )
     toy_settings = services.ToySettings(repo=repo)
-
-    toy_settings.set("FOO", "42", timestamp=datetime.datetime.now(), by="me")
 
     with pytest.raises(services.AlreadySet):
         toy_settings.set("FOO", "43", timestamp=datetime.datetime.now(), by="me")
@@ -31,10 +33,13 @@ def test_set_cannot_update_value():
 
 
 def test_can_change_setting():
-    repo = MemoryRepo()
+    repo = MemoryRepo(
+        [
+            factories.Set(key="FOO", value="42"),
+        ]
+    )
     toy_settings = services.ToySettings(repo=repo)
 
-    toy_settings.set("FOO", "42", timestamp=datetime.datetime.now(), by="me")
     toy_settings.change("FOO", "43", timestamp=datetime.datetime.now(), by="me")
 
     assert repo.all_settings() == {"FOO": "43"}
