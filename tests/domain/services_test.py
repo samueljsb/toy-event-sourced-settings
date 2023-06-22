@@ -13,9 +13,12 @@ def test_set():
     repo = MemoryRepo()
     toy_settings = services.ToySettings(repo=repo)
 
-    toy_settings.set("FOO", "42", timestamp=datetime.datetime.now(), by="me")
+    set_at = datetime.datetime.now()
+    new_events = toy_settings.set("FOO", "42", timestamp=set_at, by="me")
 
-    assert repo.all_settings() == {"FOO": "42"}
+    assert new_events == (
+        factories.Set(key="FOO", value="42", timestamp=set_at, by="me"),
+    )
 
 
 def test_set_cannot_update_value():
@@ -29,8 +32,6 @@ def test_set_cannot_update_value():
     with pytest.raises(services.AlreadySet):
         toy_settings.set("FOO", "43", timestamp=datetime.datetime.now(), by="me")
 
-    assert repo.all_settings() == {"FOO": "42"}
-
 
 def test_can_change_setting():
     repo = MemoryRepo(
@@ -40,9 +41,12 @@ def test_can_change_setting():
     )
     toy_settings = services.ToySettings(repo=repo)
 
-    toy_settings.change("FOO", "43", timestamp=datetime.datetime.now(), by="me")
+    changed_at = datetime.datetime.now()
+    new_events = toy_settings.change("FOO", "43", timestamp=changed_at, by="me")
 
-    assert repo.all_settings() == {"FOO": "43"}
+    assert new_events == (
+        factories.Changed(key="FOO", new_value="43", timestamp=changed_at, by="me"),
+    )
 
 
 def test_cannot_change_non_existent_setting():

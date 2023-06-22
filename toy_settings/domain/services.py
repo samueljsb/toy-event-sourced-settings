@@ -29,7 +29,7 @@ class ToySettings:
         *,
         timestamp: datetime.datetime,
         by: str,
-    ) -> None:
+    ) -> tuple[events.Event, ...]:
         """
         Create a new setting.
 
@@ -40,14 +40,19 @@ class ToySettings:
         if current_value is not None:
             raise AlreadySet(key)
 
-        self.repo.record(
+        new_events = (
             events.Set(
                 timestamp=timestamp,
                 by=by,
                 key=key,
                 value=value,
-            )
+            ),
         )
+
+        for event in new_events:
+            self.repo.record(event)
+
+        return new_events
 
     def change(
         self,
@@ -56,7 +61,7 @@ class ToySettings:
         *,
         timestamp: datetime.datetime,
         by: str,
-    ) -> None:
+    ) -> tuple[events.Event, ...]:
         """
         Change the current value of a setting.
 
@@ -67,14 +72,19 @@ class ToySettings:
         if current_value is None:
             raise NotSet(key)
 
-        self.repo.record(
+        new_events = (
             events.Changed(
                 timestamp=timestamp,
                 by=by,
                 key=key,
                 new_value=new_value,
-            )
+            ),
         )
+
+        for event in new_events:
+            self.repo.record(event)
+
+        return new_events
 
     def unset(
         self,
@@ -82,7 +92,7 @@ class ToySettings:
         *,
         timestamp: datetime.datetime,
         by: str,
-    ) -> None:
+    ) -> tuple[events.Event, ...]:
         """
         Unset a setting.
 
@@ -93,10 +103,15 @@ class ToySettings:
         if current_value is None:
             raise NotSet(key)
 
-        self.repo.record(
+        new_events = (
             events.Unset(
                 timestamp=timestamp,
                 by=by,
                 key=key,
-            )
+            ),
         )
+
+        for event in new_events:
+            self.repo.record(event)
+
+        return new_events
