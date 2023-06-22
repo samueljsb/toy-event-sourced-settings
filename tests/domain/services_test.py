@@ -4,17 +4,9 @@ import datetime
 
 import pytest
 
-from toy_settings.domain import events
+from tests.domain import factories
 from toy_settings.domain import services
 from toy_settings.repositories.memory import MemoryRepo
-
-
-def _set_event(key: str, value: str) -> events.Set:
-    return events.Set(timestamp=datetime.datetime.now(), by="me", key=key, value=value)
-
-
-def _unset_event(key: str) -> events.Unset:
-    return events.Unset(timestamp=datetime.datetime.now(), by="me", key=key)
 
 
 def test_set():
@@ -60,8 +52,8 @@ def test_cannot_change_non_existent_setting():
 def test_cannot_change_unset_setting():
     repo = MemoryRepo(
         [
-            _set_event("FOO", "42"),
-            _unset_event("FOO"),
+            factories.Set(key="FOO", value="42"),
+            factories.Unset(key="FOO"),
         ]
     )
     toy_settings = services.ToySettings(repo=repo)
@@ -74,21 +66,22 @@ def test_cannot_change_unset_setting():
 def test_unset_removes_value():
     repo = MemoryRepo(
         [
-            _set_event("FOO", "42"),
+            factories.Set(key="FOO", value="42"),
         ]
     )
     toy_settings = services.ToySettings(repo=repo)
 
-    toy_settings.unset("FOO", timestamp=datetime.datetime.now(), by="me")
+    unset_at = datetime.datetime.now()
+    new_events = toy_settings.unset("FOO", timestamp=unset_at, by="me")
 
-    assert repo.all_settings() == {}
+    assert new_events == (factories.Unset(key="FOO", timestamp=unset_at, by="me"),)
 
 
 def test_unset_already_unset():
     repo = MemoryRepo(
         [
-            _set_event("FOO", "42"),
-            _unset_event("FOO"),
+            factories.Set(key="FOO", value="42"),
+            factories.Unset(key="FOO"),
         ]
     )
     toy_settings = services.ToySettings(repo=repo)
