@@ -60,8 +60,8 @@ class ToySettings:
         Raises:
             AlreadySet: The setting already exists.
         """
-        domain = services.ToySettings(state=self.uow.repo)
         with self.retry(), self.uow as uow:
+            domain = services.ToySettings(state=self.uow.repo)
             try:
                 new_events = domain.set(
                     key,
@@ -90,8 +90,8 @@ class ToySettings:
         Raises:
             NotSet: There is no setting for this key.
         """
-        domain = services.ToySettings(state=self.uow.repo)
         with self.retry(), self.uow as uow:
+            domain = services.ToySettings(state=self.uow.repo)
             try:
                 new_events = domain.change(
                     key,
@@ -119,8 +119,8 @@ class ToySettings:
         Raises:
             NotSet: There is no setting for this key.
         """
-        domain = services.ToySettings(state=self.uow.repo)
         with self.retry(), self.uow as uow:
+            domain = services.ToySettings(state=self.uow.repo)
             try:
                 new_events = domain.unset(
                     key,
