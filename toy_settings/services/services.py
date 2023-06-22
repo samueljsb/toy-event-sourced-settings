@@ -63,12 +63,14 @@ class ToySettings:
         domain = services.ToySettings(repo=self.uow.repo)
         try:
             with self.uow as uow, self.retry():
-                domain.set(
+                new_events = domain.set(
                     key,
                     value,
                     timestamp=timestamp,
                     by=by,
                 )
+                for event in new_events:
+                    self.uow.repo.record(event)
                 uow.commit()
         except services.AlreadySet as exc:
             raise AlreadySet(key) from exc
@@ -90,12 +92,14 @@ class ToySettings:
         domain = services.ToySettings(repo=self.uow.repo)
         try:
             with self.uow as uow, self.retry():
-                domain.change(
+                new_events = domain.change(
                     key,
                     new_value,
                     timestamp=timestamp,
                     by=by,
                 )
+                for event in new_events:
+                    self.uow.repo.record(event)
                 uow.commit()
         except services.NotSet as exc:
             raise NotSet(key) from exc
@@ -116,11 +120,13 @@ class ToySettings:
         domain = services.ToySettings(repo=self.uow.repo)
         try:
             with self.uow as uow, self.retry():
-                domain.unset(
+                new_events = domain.unset(
                     key,
                     timestamp=timestamp,
                     by=by,
                 )
+                for event in new_events:
+                    self.uow.repo.record(event)
                 uow.commit()
         except services.NotSet as exc:
             raise NotSet(key) from exc

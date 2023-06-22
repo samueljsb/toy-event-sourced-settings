@@ -40,7 +40,7 @@ class ToySettings:
         if current_value is not None:
             raise AlreadySet(key)
 
-        new_events = (
+        return (
             events.Set(
                 timestamp=timestamp,
                 by=by,
@@ -48,11 +48,6 @@ class ToySettings:
                 value=value,
             ),
         )
-
-        for event in new_events:
-            self.repo.record(event)
-
-        return new_events
 
     def change(
         self,
@@ -72,7 +67,7 @@ class ToySettings:
         if current_value is None:
             raise NotSet(key)
 
-        new_events = (
+        return (
             events.Changed(
                 timestamp=timestamp,
                 by=by,
@@ -80,11 +75,6 @@ class ToySettings:
                 new_value=new_value,
             ),
         )
-
-        for event in new_events:
-            self.repo.record(event)
-
-        return new_events
 
     def unset(
         self,
@@ -103,15 +93,10 @@ class ToySettings:
         if current_value is None:
             raise NotSet(key)
 
-        new_events = (
+        return (
             events.Unset(
                 timestamp=timestamp,
                 by=by,
                 key=key,
             ),
         )
-
-        for event in new_events:
-            self.repo.record(event)
-
-        return new_events
