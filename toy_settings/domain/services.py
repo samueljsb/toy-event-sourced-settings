@@ -20,7 +20,7 @@ class NotSet(Exception):
 
 @attrs.frozen
 class ToySettings:
-    repo: storage.Repository
+    state: storage.Repository
 
     def set(
         self,
@@ -36,7 +36,7 @@ class ToySettings:
         Raises:
             AlreadySet: The setting already exists.
         """
-        current_value = self.repo.current_value(key)
+        current_value = self.state.current_value(key)
         if current_value is not None:
             raise AlreadySet(key)
 
@@ -63,7 +63,7 @@ class ToySettings:
         Raises:
             NotSet: There is no setting for this key.
         """
-        current_value = self.repo.current_value(key)
+        current_value = self.state.current_value(key)
         if current_value is None:
             raise NotSet(key)
 
@@ -89,7 +89,7 @@ class ToySettings:
         Raises:
             NotSet: There is no setting for this key.
         """
-        current_value = self.repo.current_value(key)
+        current_value = self.state.current_value(key)
         if current_value is None:
             raise NotSet(key)
 
