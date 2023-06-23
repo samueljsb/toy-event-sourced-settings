@@ -28,21 +28,21 @@ class NotSet(Exception):
 @attrs.frozen
 class ToySettings:
     state: queries.Repository
-    uow: unit_of_work.UnitOfWork
+    committer: unit_of_work.Committer
     max_wait_seconds: int
 
     @classmethod
     def new(cls, max_wait_seconds: int = 0) -> ToySettings:
         return cls(
             state=queries.get_repository(),
-            uow=unit_of_work.get_uow(),
+            committer=unit_of_work.get_committer(),
             max_wait_seconds=max_wait_seconds,
         )
 
     @contextlib.contextmanager
     def retry(self) -> Generator[None, None, None]:
         for attempt in Retrying(
-            retry=retry_if_exception_type(queries.StaleState),
+            retry=retry_if_exception_type(unit_of_work.StaleState),
             wait=wait_random_exponential(multiplier=0.1, max=self.max_wait_seconds),
         ):
             with attempt:
@@ -62,21 +62,19 @@ class ToySettings:
         Raises:
             AlreadySet: The setting already exists.
         """
-        with self.retry(), self.uow as uow:
+        with self.retry(), unit_of_work.commit_on_success(self.committer) as new_events:
             domain = operations.ToySettings(state=self.state)
             try:
-                new_events = domain.set(
-                    key,
-                    value,
-                    timestamp=timestamp,
-                    by=by,
+                new_events.extend(
+                    domain.set(
+                        key,
+                        value,
+                        timestamp=timestamp,
+                        by=by,
+                    )
                 )
             except operations.AlreadySet as exc:
                 raise AlreadySet(key) from exc
-
-            for event in new_events:
-                self.state.record(event)
-            uow.commit()
 
     def change(
         self,
@@ -92,21 +90,19 @@ class ToySettings:
         Raises:
             NotSet: There is no setting for this key.
         """
-        with self.retry(), self.uow as uow:
+        with self.retry(), unit_of_work.commit_on_success(self.committer) as new_events:
             domain = operations.ToySettings(state=self.state)
             try:
-                new_events = domain.change(
-                    key,
-                    new_value,
-                    timestamp=timestamp,
-                    by=by,
+                new_events.extend(
+                    domain.change(
+                        key,
+                        new_value,
+                        timestamp=timestamp,
+                        by=by,
+                    )
                 )
             except operations.NotSet as exc:
                 raise NotSet(key) from exc
-
-            for event in new_events:
-                self.state.record(event)
-            uow.commit()
 
     def unset(
         self,
@@ -121,17 +117,15 @@ class ToySettings:
         Raises:
             NotSet: There is no setting for this key.
         """
-        with self.retry(), self.uow as uow:
+        with self.retry(), unit_of_work.commit_on_success(self.committer) as new_events:
             domain = operations.ToySettings(state=self.state)
             try:
-                new_events = domain.unset(
-                    key,
-                    timestamp=timestamp,
-                    by=by,
+                new_events.extend(
+                    domain.unset(
+                        key,
+                        timestamp=timestamp,
+                        by=by,
+                    )
                 )
             except operations.NotSet as exc:
                 raise NotSet(key) from exc
-
-            for event in new_events:
-                self.state.record(event)
-            uow.commit()
