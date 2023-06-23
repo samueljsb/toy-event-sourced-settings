@@ -9,6 +9,7 @@ from tenacity import Retrying
 from tenacity import retry_if_exception_type
 from tenacity import wait_random_exponential
 
+from toy_settings import config
 from toy_settings.domain import operations
 from toy_settings.domain import queries
 
@@ -34,8 +35,8 @@ class ToySettings:
     @classmethod
     def new(cls, max_wait_seconds: int = 0) -> ToySettings:
         return cls(
-            state=queries.get_repository(),
-            committer=unit_of_work.get_committer(),
+            state=config.get_repository(),
+            committer=config.get_committer(),
             max_wait_seconds=max_wait_seconds,
         )
 

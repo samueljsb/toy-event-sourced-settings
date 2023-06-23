@@ -4,15 +4,7 @@ import abc
 from contextlib import contextmanager
 from typing import Iterator
 
-from django.utils.module_loading import import_string
-
 from toy_settings.domain import events
-
-DEFAULT_TOY_SETTINGS_COMMITTER = "toy_settings.units_of_work.django.DjangoCommitter"
-
-
-def get_committer() -> Committer:
-    return import_string(DEFAULT_TOY_SETTINGS_COMMITTER)()
 
 
 @contextmanager

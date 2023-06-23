@@ -11,8 +11,9 @@ from django.http import HttpResponse
 from django.utils import timezone
 from django.views import generic
 
+from toy_settings import config
+
 from .application import services
-from .domain import queries
 
 MAX_WAIT_SECONDS = 5
 
@@ -27,7 +28,7 @@ class Settings(generic.TemplateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
 
-        repo = queries.get_repository()
+        repo = config.get_repository()
         settings = repo.all_settings()
         context["settings"] = sorted(settings.items())
 
@@ -36,7 +37,7 @@ class Settings(generic.TemplateView):
 
 class SettingsJson(generic.View):
     def get(self, request: http.HttpRequest) -> http.HttpResponse:
-        repo = queries.get_repository()
+        repo = config.get_repository()
         settings = repo.all_settings()
         return http.HttpResponse(json.dumps(settings))
 
@@ -47,7 +48,7 @@ class SettingHistory(generic.TemplateView):
     def get_context_data(self, key: str, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
 
-        repo = queries.get_repository()
+        repo = config.get_repository()
         context["key"] = key
         context["value"] = repo.current_value(key)
         events = repo.events_for_key(key)
@@ -115,7 +116,7 @@ class ChangeSetting(generic.FormView):
     def get_initial(self) -> dict[str, Any]:
         initial = super().get_initial()
 
-        repo = queries.get_repository()
+        repo = config.get_repository()
         current_value = repo.current_value(self.key)
 
         initial["key"] = self.key
