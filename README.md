@@ -9,6 +9,7 @@ In a virtual environment:
 
 ```shell
 python -mpip install -rrequirements.txt
+python -mmanage migrate
 python -mmanage runserver
 ```
 
