@@ -65,16 +65,16 @@ class ToySettings:
         with self.retry(), unit_of_work.commit_on_success(self.committer) as new_events:
             domain = operations.ToySettings(state=self.state)
             try:
-                new_events.append(
-                    domain.set(
-                        key,
-                        value,
-                        timestamp=timestamp,
-                        by=by,
-                    )
+                new_event = domain.set(
+                    key,
+                    value,
+                    timestamp=timestamp,
+                    by=by,
                 )
             except operations.AlreadySet as exc:
                 raise AlreadySet(key) from exc
+            else:
+                new_events.append(new_event)
 
     def change(
         self,
@@ -93,16 +93,16 @@ class ToySettings:
         with self.retry(), unit_of_work.commit_on_success(self.committer) as new_events:
             domain = operations.ToySettings(state=self.state)
             try:
-                new_events.append(
-                    domain.change(
-                        key,
-                        new_value,
-                        timestamp=timestamp,
-                        by=by,
-                    )
+                new_event = domain.change(
+                    key,
+                    new_value,
+                    timestamp=timestamp,
+                    by=by,
                 )
             except operations.NotSet as exc:
                 raise NotSet(key) from exc
+            else:
+                new_events.append(new_event)
 
     def unset(
         self,
@@ -120,12 +120,12 @@ class ToySettings:
         with self.retry(), unit_of_work.commit_on_success(self.committer) as new_events:
             domain = operations.ToySettings(state=self.state)
             try:
-                new_events.append(
-                    domain.unset(
-                        key,
-                        timestamp=timestamp,
-                        by=by,
-                    )
+                new_event = domain.unset(
+                    key,
+                    timestamp=timestamp,
+                    by=by,
                 )
             except operations.NotSet as exc:
                 raise NotSet(key) from exc
+            else:
+                new_events.append(new_event)
