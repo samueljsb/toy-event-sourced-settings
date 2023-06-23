@@ -27,12 +27,14 @@ class NotSet(Exception):
 
 @attrs.frozen
 class ToySettings:
+    state: queries.Repository
     uow: unit_of_work.UnitOfWork
     max_wait_seconds: int
 
     @classmethod
     def new(cls, max_wait_seconds: int = 0) -> ToySettings:
         return cls(
+            state=queries.get_repository(),
             uow=unit_of_work.get_uow(),
             max_wait_seconds=max_wait_seconds,
         )
@@ -61,7 +63,7 @@ class ToySettings:
             AlreadySet: The setting already exists.
         """
         with self.retry(), self.uow as uow:
-            domain = operations.ToySettings(state=self.uow.repo)
+            domain = operations.ToySettings(state=self.state)
             try:
                 new_events = domain.set(
                     key,
@@ -73,7 +75,7 @@ class ToySettings:
                 raise AlreadySet(key) from exc
 
             for event in new_events:
-                self.uow.repo.record(event)
+                self.state.record(event)
             uow.commit()
 
     def change(
@@ -91,7 +93,7 @@ class ToySettings:
             NotSet: There is no setting for this key.
         """
         with self.retry(), self.uow as uow:
-            domain = operations.ToySettings(state=self.uow.repo)
+            domain = operations.ToySettings(state=self.state)
             try:
                 new_events = domain.change(
                     key,
@@ -103,7 +105,7 @@ class ToySettings:
                 raise NotSet(key) from exc
 
             for event in new_events:
-                self.uow.repo.record(event)
+                self.state.record(event)
             uow.commit()
 
     def unset(
@@ -120,7 +122,7 @@ class ToySettings:
             NotSet: There is no setting for this key.
         """
         with self.retry(), self.uow as uow:
-            domain = operations.ToySettings(state=self.uow.repo)
+            domain = operations.ToySettings(state=self.state)
             try:
                 new_events = domain.unset(
                     key,
@@ -131,5 +133,5 @@ class ToySettings:
                 raise NotSet(key) from exc
 
             for event in new_events:
-                self.uow.repo.record(event)
+                self.state.record(event)
             uow.commit()
