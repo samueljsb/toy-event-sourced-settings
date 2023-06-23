@@ -9,8 +9,8 @@ from tenacity import Retrying
 from tenacity import retry_if_exception_type
 from tenacity import wait_random_exponential
 
+from toy_settings.domain import queries
 from toy_settings.domain import services
-from toy_settings.domain import storage
 
 from . import unit_of_work
 
@@ -40,7 +40,7 @@ class ToySettings:
     @contextlib.contextmanager
     def retry(self) -> Generator[None, None, None]:
         for attempt in Retrying(
-            retry=retry_if_exception_type(storage.StaleState),
+            retry=retry_if_exception_type(queries.StaleState),
             wait=wait_random_exponential(multiplier=0.1, max=self.max_wait_seconds),
         ):
             with attempt:

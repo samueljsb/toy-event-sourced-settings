@@ -6,7 +6,7 @@ from typing import Any
 from django.utils.module_loading import import_string
 from typing_extensions import Self
 
-from toy_settings.domain import storage
+from toy_settings.domain import queries
 
 DEFAULT_TOY_SETTINGS_UOW_PATH = "toy_settings.units_of_work.django.DjangoUoW"
 
@@ -16,7 +16,7 @@ def get_uow() -> UnitOfWork:
 
 
 class UnitOfWork(abc.ABC):
-    repo: storage.Repository
+    repo: queries.Repository
 
     @classmethod
     @abc.abstractmethod

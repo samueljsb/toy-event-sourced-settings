@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from toy_settings.domain import events
 from toy_settings.domain import projections
-from toy_settings.domain import storage
+from toy_settings.domain import queries
 
 
-class MemoryRepo(storage.Repository):
+class MemoryRepo(queries.Repository):
     def __init__(self, history: list[events.Event] | None = None) -> None:
         self.events: list[events.Event] = history or []
 

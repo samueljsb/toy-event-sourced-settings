@@ -5,7 +5,7 @@ import datetime
 import attrs
 
 from . import events
-from . import storage
+from . import queries
 
 
 @attrs.frozen
@@ -20,7 +20,7 @@ class NotSet(Exception):
 
 @attrs.frozen
 class ToySettings:
-    state: storage.Repository
+    state: queries.Repository
 
     def set(
         self,

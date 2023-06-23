@@ -7,7 +7,7 @@ from django.db.models import Q
 
 from toy_settings.domain import events
 from toy_settings.domain import projections
-from toy_settings.domain import storage
+from toy_settings.domain import queries
 
 from . import models
 
@@ -35,7 +35,7 @@ def _from_json(payload: str, event_type: str, version: int) -> events.Event:
     return converter.structure(parsed, _event_type(event_type, version))
 
 
-class DjangoRepo(storage.Repository):
+class DjangoRepo(queries.Repository):
     def record(self, event: events.Event) -> None:
         """Record a new event.
 
