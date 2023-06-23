@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import attrs
 
+from toy_settings.application import unit_of_work
 from toy_settings.repositories import memory
-from toy_settings.services import unit_of_work
 
 
 @attrs.define

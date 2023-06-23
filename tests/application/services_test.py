@@ -4,7 +4,7 @@ import datetime
 
 import pytest
 
-from toy_settings.services import services
+from toy_settings.application import services
 from toy_settings.units_of_work.memory import MemoryUoW
 
 

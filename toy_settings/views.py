@@ -11,8 +11,8 @@ from django.http import HttpResponse
 from django.utils import timezone
 from django.views import generic
 
+from .application import services
 from .domain import storage
-from .services import services
 
 MAX_WAIT_SECONDS = 5
 

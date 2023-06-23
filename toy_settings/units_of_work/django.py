@@ -6,8 +6,8 @@ import attrs
 from django.db import transaction
 from typing_extensions import Self
 
+from toy_settings.application import unit_of_work
 from toy_settings.repositories.django import repo
-from toy_settings.services import unit_of_work
 
 
 @attrs.define
