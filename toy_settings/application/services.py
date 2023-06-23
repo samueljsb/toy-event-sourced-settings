@@ -65,7 +65,7 @@ class ToySettings:
         with self.retry(), unit_of_work.commit_on_success(self.committer) as new_events:
             domain = operations.ToySettings(state=self.state)
             try:
-                new_events.extend(
+                new_events.append(
                     domain.set(
                         key,
                         value,
@@ -93,7 +93,7 @@ class ToySettings:
         with self.retry(), unit_of_work.commit_on_success(self.committer) as new_events:
             domain = operations.ToySettings(state=self.state)
             try:
-                new_events.extend(
+                new_events.append(
                     domain.change(
                         key,
                         new_value,
@@ -120,7 +120,7 @@ class ToySettings:
         with self.retry(), unit_of_work.commit_on_success(self.committer) as new_events:
             domain = operations.ToySettings(state=self.state)
             try:
-                new_events.extend(
+                new_events.append(
                     domain.unset(
                         key,
                         timestamp=timestamp,

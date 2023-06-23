@@ -29,7 +29,7 @@ class ToySettings:
         *,
         timestamp: datetime.datetime,
         by: str,
-    ) -> tuple[events.Event, ...]:
+    ) -> events.Event:
         """
         Create a new setting.
 
@@ -40,13 +40,11 @@ class ToySettings:
         if current_value is not None:
             raise AlreadySet(key)
 
-        return (
-            events.Set(
-                timestamp=timestamp,
-                by=by,
-                key=key,
-                value=value,
-            ),
+        return events.Set(
+            timestamp=timestamp,
+            by=by,
+            key=key,
+            value=value,
         )
 
     def change(
@@ -56,7 +54,7 @@ class ToySettings:
         *,
         timestamp: datetime.datetime,
         by: str,
-    ) -> tuple[events.Event, ...]:
+    ) -> events.Event:
         """
         Change the current value of a setting.
 
@@ -67,13 +65,11 @@ class ToySettings:
         if current_value is None:
             raise NotSet(key)
 
-        return (
-            events.Changed(
-                timestamp=timestamp,
-                by=by,
-                key=key,
-                new_value=new_value,
-            ),
+        return events.Changed(
+            timestamp=timestamp,
+            by=by,
+            key=key,
+            new_value=new_value,
         )
 
     def unset(
@@ -82,7 +78,7 @@ class ToySettings:
         *,
         timestamp: datetime.datetime,
         by: str,
-    ) -> tuple[events.Event, ...]:
+    ) -> events.Event:
         """
         Unset a setting.
 
@@ -93,10 +89,8 @@ class ToySettings:
         if current_value is None:
             raise NotSet(key)
 
-        return (
-            events.Unset(
-                timestamp=timestamp,
-                by=by,
-                key=key,
-            ),
+        return events.Unset(
+            timestamp=timestamp,
+            by=by,
+            key=key,
         )
