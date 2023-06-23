@@ -9,8 +9,8 @@ from tenacity import Retrying
 from tenacity import retry_if_exception_type
 from tenacity import wait_random_exponential
 
+from toy_settings.domain import operations
 from toy_settings.domain import queries
-from toy_settings.domain import services
 
 from . import unit_of_work
 
@@ -61,7 +61,7 @@ class ToySettings:
             AlreadySet: The setting already exists.
         """
         with self.retry(), self.uow as uow:
-            domain = services.ToySettings(state=self.uow.repo)
+            domain = operations.ToySettings(state=self.uow.repo)
             try:
                 new_events = domain.set(
                     key,
@@ -69,7 +69,7 @@ class ToySettings:
                     timestamp=timestamp,
                     by=by,
                 )
-            except services.AlreadySet as exc:
+            except operations.AlreadySet as exc:
                 raise AlreadySet(key) from exc
 
             for event in new_events:
@@ -91,7 +91,7 @@ class ToySettings:
             NotSet: There is no setting for this key.
         """
         with self.retry(), self.uow as uow:
-            domain = services.ToySettings(state=self.uow.repo)
+            domain = operations.ToySettings(state=self.uow.repo)
             try:
                 new_events = domain.change(
                     key,
@@ -99,7 +99,7 @@ class ToySettings:
                     timestamp=timestamp,
                     by=by,
                 )
-            except services.NotSet as exc:
+            except operations.NotSet as exc:
                 raise NotSet(key) from exc
 
             for event in new_events:
@@ -120,14 +120,14 @@ class ToySettings:
             NotSet: There is no setting for this key.
         """
         with self.retry(), self.uow as uow:
-            domain = services.ToySettings(state=self.uow.repo)
+            domain = operations.ToySettings(state=self.uow.repo)
             try:
                 new_events = domain.unset(
                     key,
                     timestamp=timestamp,
                     by=by,
                 )
-            except services.NotSet as exc:
+            except operations.NotSet as exc:
                 raise NotSet(key) from exc
 
             for event in new_events:
