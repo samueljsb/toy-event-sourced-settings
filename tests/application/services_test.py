@@ -27,15 +27,15 @@ def test_set():
 
 
 def test_set_cannot_update_value():
-    history: list[events.Event] = []
+    set_at = datetime.datetime.now()
+    history: list[events.Event] = [
+        events.Set(key="FOO", value="42", timestamp=set_at, by="me"),
+    ]
     state = MemoryRepo(history=history)
     committer = MemoryCommitter(history=history)
     toy_settings = services.ToySettings(
         state=state, committer=committer, max_wait_seconds=0
     )
-
-    set_at = datetime.datetime.now()
-    toy_settings.set("FOO", "42", timestamp=set_at, by="me")
 
     with pytest.raises(services.AlreadySet):
         toy_settings.set("FOO", "43", timestamp=datetime.datetime.now(), by="me")
@@ -46,15 +46,16 @@ def test_set_cannot_update_value():
 
 
 def test_can_change_setting():
-    history: list[events.Event] = []
+    set_at = datetime.datetime.now()
+    history: list[events.Event] = [
+        events.Set(key="FOO", value="42", timestamp=set_at, by="me"),
+    ]
     state = MemoryRepo(history=history)
     committer = MemoryCommitter(history=history)
     toy_settings = services.ToySettings(
         state=state, committer=committer, max_wait_seconds=0
     )
 
-    set_at = datetime.datetime.now()
-    toy_settings.set("FOO", "42", timestamp=set_at, by="me")
     changed_at = datetime.datetime.now()
     toy_settings.change("FOO", "43", timestamp=changed_at, by="me")
 
@@ -80,15 +81,16 @@ def test_cannot_change_non_existent_setting():
 
 
 def test_unset_removes_value():
-    history: list[events.Event] = []
+    set_at = datetime.datetime.now()
+    history: list[events.Event] = [
+        events.Set(key="FOO", value="42", timestamp=set_at, by="me"),
+    ]
     state = MemoryRepo(history=history)
     committer = MemoryCommitter(history=history)
     toy_settings = services.ToySettings(
         state=state, committer=committer, max_wait_seconds=0
     )
 
-    set_at = datetime.datetime.now()
-    toy_settings.set("FOO", "42", timestamp=set_at, by="me")
     unset_at = datetime.datetime.now()
     toy_settings.unset("FOO", timestamp=unset_at, by="me")
 
@@ -99,17 +101,17 @@ def test_unset_removes_value():
 
 
 def test_cannot_change_unset_setting():
-    history: list[events.Event] = []
+    set_at = datetime.datetime.now()
+    unset_at = datetime.datetime.now()
+    history: list[events.Event] = [
+        events.Set(key="FOO", value="42", timestamp=set_at, by="me"),
+        events.Unset(key="FOO", timestamp=unset_at, by="me"),
+    ]
     state = MemoryRepo(history=history)
     committer = MemoryCommitter(history=history)
     toy_settings = services.ToySettings(
         state=state, committer=committer, max_wait_seconds=0
     )
-
-    set_at = datetime.datetime.now()
-    toy_settings.set("FOO", "42", timestamp=set_at, by="me")
-    unset_at = datetime.datetime.now()
-    toy_settings.unset("FOO", timestamp=unset_at, by="me")
 
     # check we are not allowed to change a setting that has been unset
     with pytest.raises(services.NotSet):
@@ -122,17 +124,17 @@ def test_cannot_change_unset_setting():
 
 
 def test_unset_already_unset():
-    history: list[events.Event] = []
+    set_at = datetime.datetime.now()
+    unset_at = datetime.datetime.now()
+    history: list[events.Event] = [
+        events.Set(key="FOO", value="42", timestamp=set_at, by="me"),
+        events.Unset(key="FOO", timestamp=unset_at, by="me"),
+    ]
     state = MemoryRepo(history=history)
     committer = MemoryCommitter(history=history)
     toy_settings = services.ToySettings(
         state=state, committer=committer, max_wait_seconds=0
     )
-
-    set_at = datetime.datetime.now()
-    toy_settings.set("FOO", "42", timestamp=set_at, by="me")
-    unset_at = datetime.datetime.now()
-    toy_settings.unset("FOO", timestamp=unset_at, by="me")
 
     # check we are not allowed to unset it again
     with pytest.raises(services.NotSet):
