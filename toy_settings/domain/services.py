@@ -20,7 +20,7 @@ class NotSet(Exception):
 
 @attrs.frozen
 class ToySettings:
-    repo: storage.Repository
+    state: storage.Repository
 
     def set(
         self,
@@ -29,24 +29,24 @@ class ToySettings:
         *,
         timestamp: datetime.datetime,
         by: str,
-    ) -> None:
+    ) -> tuple[events.Event, ...]:
         """
         Create a new setting.
 
         Raises:
             AlreadySet: The setting already exists.
         """
-        current_value = self.repo.current_value(key)
+        current_value = self.state.current_value(key)
         if current_value is not None:
             raise AlreadySet(key)
 
-        self.repo.record(
+        return (
             events.Set(
                 timestamp=timestamp,
                 by=by,
                 key=key,
                 value=value,
-            )
+            ),
         )
 
     def change(
@@ -56,24 +56,24 @@ class ToySettings:
         *,
         timestamp: datetime.datetime,
         by: str,
-    ) -> None:
+    ) -> tuple[events.Event, ...]:
         """
         Change the current value of a setting.
 
         Raises:
             NotSet: There is no setting for this key.
         """
-        current_value = self.repo.current_value(key)
+        current_value = self.state.current_value(key)
         if current_value is None:
             raise NotSet(key)
 
-        self.repo.record(
+        return (
             events.Changed(
                 timestamp=timestamp,
                 by=by,
                 key=key,
                 new_value=new_value,
-            )
+            ),
         )
 
     def unset(
@@ -82,21 +82,21 @@ class ToySettings:
         *,
         timestamp: datetime.datetime,
         by: str,
-    ) -> None:
+    ) -> tuple[events.Event, ...]:
         """
         Unset a setting.
 
         Raises:
             NotSet: There is no setting for this key.
         """
-        current_value = self.repo.current_value(key)
+        current_value = self.state.current_value(key)
         if current_value is None:
             raise NotSet(key)
 
-        self.repo.record(
+        return (
             events.Unset(
                 timestamp=timestamp,
                 by=by,
                 key=key,
-            )
+            ),
         )
