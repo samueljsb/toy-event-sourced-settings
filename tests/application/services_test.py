@@ -5,13 +5,15 @@ import datetime
 import pytest
 
 from toy_settings.application import services
+from toy_settings.domain import events
 from toy_settings.repositories.memory import MemoryRepo
 from toy_settings.units_of_work.memory import MemoryUoW
 
 
 def test_set():
-    uow = MemoryUoW.new()
-    state = MemoryRepo()
+    history: list[events.Event] = []
+    state = MemoryRepo(history=history)
+    uow = MemoryUoW(history=history, repo=state)
     toy_settings = services.ToySettings(state=state, uow=uow, max_wait_seconds=0)
 
     toy_settings.set("FOO", "42", timestamp=datetime.datetime.now(), by="me")
@@ -21,8 +23,9 @@ def test_set():
 
 
 def test_set_cannot_update_value():
-    uow = MemoryUoW.new()
-    state = MemoryRepo()
+    history: list[events.Event] = []
+    state = MemoryRepo(history=history)
+    uow = MemoryUoW(history=history, repo=state)
     toy_settings = services.ToySettings(state=state, uow=uow, max_wait_seconds=0)
 
     toy_settings.set("FOO", "42", timestamp=datetime.datetime.now(), by="me")
@@ -35,8 +38,9 @@ def test_set_cannot_update_value():
 
 
 def test_can_change_setting():
-    uow = MemoryUoW.new()
-    state = MemoryRepo()
+    history: list[events.Event] = []
+    state = MemoryRepo(history=history)
+    uow = MemoryUoW(history=history, repo=state)
     toy_settings = services.ToySettings(state=state, uow=uow, max_wait_seconds=0)
 
     toy_settings.set("FOO", "42", timestamp=datetime.datetime.now(), by="me")
@@ -47,8 +51,9 @@ def test_can_change_setting():
 
 
 def test_cannot_change_non_existent_setting():
-    uow = MemoryUoW.new()
-    state = MemoryRepo()
+    history: list[events.Event] = []
+    state = MemoryRepo(history=history)
+    uow = MemoryUoW(history=history, repo=state)
     toy_settings = services.ToySettings(state=state, uow=uow, max_wait_seconds=0)
 
     # check we are not allowed to change a setting that does not exist
@@ -59,8 +64,9 @@ def test_cannot_change_non_existent_setting():
 
 
 def test_unset_removes_value():
-    uow = MemoryUoW.new()
-    state = MemoryRepo()
+    history: list[events.Event] = []
+    state = MemoryRepo(history=history)
+    uow = MemoryUoW(history=history, repo=state)
     toy_settings = services.ToySettings(state=state, uow=uow, max_wait_seconds=0)
 
     toy_settings.set("FOO", "42", timestamp=datetime.datetime.now(), by="me")
@@ -71,8 +77,9 @@ def test_unset_removes_value():
 
 
 def test_cannot_change_unset_setting():
-    uow = MemoryUoW.new()
-    state = MemoryRepo()
+    history: list[events.Event] = []
+    state = MemoryRepo(history=history)
+    uow = MemoryUoW(history=history, repo=state)
     toy_settings = services.ToySettings(state=state, uow=uow, max_wait_seconds=0)
 
     toy_settings.set("FOO", "42", timestamp=datetime.datetime.now(), by="me")
@@ -86,8 +93,9 @@ def test_cannot_change_unset_setting():
 
 
 def test_unset_already_unset():
-    uow = MemoryUoW.new()
-    state = MemoryRepo()
+    history: list[events.Event] = []
+    state = MemoryRepo(history=history)
+    uow = MemoryUoW(history=history, repo=state)
     toy_settings = services.ToySettings(state=state, uow=uow, max_wait_seconds=0)
 
     toy_settings.set("FOO", "42", timestamp=datetime.datetime.now(), by="me")
@@ -101,8 +109,9 @@ def test_unset_already_unset():
 
 
 def test_unset_never_set():
-    uow = MemoryUoW.new()
-    state = MemoryRepo()
+    history: list[events.Event] = []
+    state = MemoryRepo(history=history)
+    uow = MemoryUoW(history=history, repo=state)
     toy_settings = services.ToySettings(state=state, uow=uow, max_wait_seconds=0)
 
     # check we are not allowed to unset it again
