@@ -11,13 +11,13 @@ from toy_settings.domain import events
 
 @attrs.define
 class MemoryCommitter(unit_of_work.Committer):
-    history: list[events.Event] = attrs.field(factory=list)
+    committed: list[events.Event] = attrs.field(factory=list)
 
     @contextmanager
     def atomic(self) -> Iterator[None]:
         self.uncommitted_events: list[events.Event] = []
         yield
-        self.history.extend(self.uncommitted_events)
+        self.committed.extend(self.uncommitted_events)
         del self.uncommitted_events
 
     def handle(self, event: events.Event) -> None:
