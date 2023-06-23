@@ -9,14 +9,14 @@ from django.utils import timezone
 from django_webtest import DjangoTestApp
 from django_webtest import DjangoWebtestResponse
 
-from toy_settings import events
-from toy_settings import storage
+from toy_settings.domain import events
+from toy_settings.domain import queries
 
-pytestmark = pytest.mark.django_db
+pytestmark = pytest.mark.django_db(transaction=True)
 
 
 @pytest.fixture(autouse=True)
-def temp_file_storage(tmp_path):
+def temp_file_queries(tmp_path):
     with unittest.mock.patch.dict(os.environ, {"XDG_STATE_HOME": str(tmp_path)}):
         yield
 
@@ -29,7 +29,7 @@ def _get_messages(response: DjangoWebtestResponse) -> list[tuple[str, str]]:
 
 
 def test_setting_history(django_app: DjangoTestApp):
-    repo = storage.get_repository()
+    repo = queries.get_repository()
     repo.record(
         events.Set(
             timestamp=timezone.now(),
@@ -78,14 +78,14 @@ def test_set_new_setting(django_app: DjangoTestApp):
         ("success", "'FOO' set to '42'"),
     ]
 
-    repo = storage.get_repository()
+    repo = queries.get_repository()
     assert repo.all_settings() == {"FOO": "42"}
 
 
 def test_new_setting_normalizes_key(django_app: DjangoTestApp):
     _set_setting(django_app, "foo-bar value", "42")
 
-    repo = storage.get_repository()
+    repo = queries.get_repository()
     assert repo.all_settings() == {"FOO_BAR_VALUE": "42"}
 
 
@@ -131,7 +131,7 @@ def test_change_setting(django_app: DjangoTestApp):
         ("success", "'FOO' set to '43'"),
     ]
 
-    repo = storage.get_repository()
+    repo = queries.get_repository()
     assert repo.all_settings() == {"FOO": "43"}
 
 
@@ -148,7 +148,7 @@ def test_cannot_change_non_existent_setting(django_app: DjangoTestApp):
         ("danger", "there is no 'FOO' setting to change"),
     ]
 
-    repo = storage.get_repository()
+    repo = queries.get_repository()
     assert repo.all_settings() == {}
 
 
@@ -174,7 +174,7 @@ def test_unset_setting(django_app_factory):
         ("success", "'FOO' unset"),
     ]
 
-    repo = storage.get_repository()
+    repo = queries.get_repository()
     assert repo.all_settings() == {}
 
 
@@ -193,5 +193,5 @@ def test_cannot_unset_non_existent_setting(django_app_factory):
         ("danger", "there is no 'FOO' setting to unset"),
     ]
 
-    repo = storage.get_repository()
+    repo = queries.get_repository()
     assert repo.all_settings() == {}

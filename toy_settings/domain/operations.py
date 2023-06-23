@@ -5,7 +5,7 @@ import datetime
 import attrs
 
 from . import events
-from . import storage
+from . import queries
 
 
 @attrs.frozen
@@ -20,16 +20,7 @@ class NotSet(Exception):
 
 @attrs.frozen
 class ToySettings:
-    repo: storage.Repository
-
-    @classmethod
-    def new(cls) -> ToySettings:
-        return cls(
-            repo=storage.get_repository(),
-        )
-
-    def normalize_key(self, key: str) -> str:
-        return key.strip().replace(" ", "_").replace("-", "_").upper()
+    state: queries.Repository
 
     def set(
         self,
@@ -38,24 +29,22 @@ class ToySettings:
         *,
         timestamp: datetime.datetime,
         by: str,
-    ) -> None:
+    ) -> events.Event:
         """
         Create a new setting.
 
         Raises:
             AlreadySet: The setting already exists.
         """
-        current_value = self.repo.current_value(key)
+        current_value = self.state.current_value(key)
         if current_value is not None:
             raise AlreadySet(key)
 
-        self.repo.record(
-            events.Set(
-                timestamp=timestamp,
-                by=by,
-                key=key,
-                value=value,
-            )
+        return events.Set(
+            timestamp=timestamp,
+            by=by,
+            key=key,
+            value=value,
         )
 
     def change(
@@ -65,24 +54,22 @@ class ToySettings:
         *,
         timestamp: datetime.datetime,
         by: str,
-    ) -> None:
+    ) -> events.Event:
         """
         Change the current value of a setting.
 
         Raises:
             NotSet: There is no setting for this key.
         """
-        current_value = self.repo.current_value(key)
+        current_value = self.state.current_value(key)
         if current_value is None:
             raise NotSet(key)
 
-        self.repo.record(
-            events.Changed(
-                timestamp=timestamp,
-                by=by,
-                key=key,
-                new_value=new_value,
-            )
+        return events.Changed(
+            timestamp=timestamp,
+            by=by,
+            key=key,
+            new_value=new_value,
         )
 
     def unset(
@@ -91,21 +78,19 @@ class ToySettings:
         *,
         timestamp: datetime.datetime,
         by: str,
-    ) -> None:
+    ) -> events.Event:
         """
         Unset a setting.
 
         Raises:
             NotSet: There is no setting for this key.
         """
-        current_value = self.repo.current_value(key)
+        current_value = self.state.current_value(key)
         if current_value is None:
             raise NotSet(key)
 
-        self.repo.record(
-            events.Unset(
-                timestamp=timestamp,
-                by=by,
-                key=key,
-            )
+        return events.Unset(
+            timestamp=timestamp,
+            by=by,
+            key=key,
         )

@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import contextlib
 import json
 from typing import Any
-from typing import Generator
 
 from django import forms
 from django import http
@@ -12,24 +10,15 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.utils import timezone
 from django.views import generic
-from tenacity import Retrying
-from tenacity import retry_if_exception_type
-from tenacity import wait_random_exponential
 
-from . import services
-from . import storage
+from .application import services
+from .domain import queries
+
+MAX_WAIT_SECONDS = 5
 
 
-# NOTE: this concern should usually live in the service layer with units of work, but we
-# don't have any here (yet?)
-@contextlib.contextmanager
-def retry(max_wait_seconds: int) -> Generator[None, None, None]:
-    for attempt in Retrying(
-        retry=retry_if_exception_type(storage.StaleState),
-        wait=wait_random_exponential(multiplier=0.1, max=max_wait_seconds),
-    ):
-        with attempt:
-            yield
+def normalize_key(key: str) -> str:
+    return key.strip().replace(" ", "_").replace("-", "_").upper()
 
 
 class Settings(generic.TemplateView):
@@ -38,7 +27,7 @@ class Settings(generic.TemplateView):
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
 
-        repo = storage.get_repository()
+        repo = queries.get_repository()
         settings = repo.all_settings()
         context["settings"] = sorted(settings.items())
 
@@ -47,7 +36,7 @@ class Settings(generic.TemplateView):
 
 class SettingsJson(generic.View):
     def get(self, request: http.HttpRequest) -> http.HttpResponse:
-        repo = storage.get_repository()
+        repo = queries.get_repository()
         settings = repo.all_settings()
         return http.HttpResponse(json.dumps(settings))
 
@@ -58,7 +47,7 @@ class SettingHistory(generic.TemplateView):
     def get_context_data(self, key: str, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
 
-        repo = storage.get_repository()
+        repo = queries.get_repository()
         context["key"] = key
         context["value"] = repo.current_value(key)
         events = repo.events_for_key(key)
@@ -86,19 +75,18 @@ class SetSetting(generic.FormView):
         return initial
 
     def form_valid(self, form: NewSettingForm) -> HttpResponse:
-        toy_settings = services.ToySettings.new()
+        toy_settings = services.ToySettings.new(max_wait_seconds=MAX_WAIT_SECONDS)
 
-        key = toy_settings.normalize_key(form.cleaned_data["key"])
+        key = normalize_key(form.cleaned_data["key"])
         value = form.cleaned_data["value"]
 
         try:
-            with retry(5):
-                toy_settings.set(
-                    key,
-                    value,
-                    timestamp=timezone.now(),
-                    by="Some User",
-                )
+            toy_settings.set(
+                key,
+                value,
+                timestamp=timezone.now(),
+                by="Some User",
+            )
         except services.AlreadySet:
             messages.error(self.request, f"{key!r} is already set")
         else:
@@ -127,7 +115,7 @@ class ChangeSetting(generic.FormView):
     def get_initial(self) -> dict[str, Any]:
         initial = super().get_initial()
 
-        repo = storage.get_repository()
+        repo = queries.get_repository()
         current_value = repo.current_value(self.key)
 
         initial["key"] = self.key
@@ -136,19 +124,18 @@ class ChangeSetting(generic.FormView):
         return initial
 
     def form_valid(self, form: ChangeSetting) -> HttpResponse:
-        toy_settings = services.ToySettings.new()
+        toy_settings = services.ToySettings.new(max_wait_seconds=MAX_WAIT_SECONDS)
 
-        key = toy_settings.normalize_key(form.cleaned_data["key"])
+        key = normalize_key(form.cleaned_data["key"])
         value = form.cleaned_data["value"]
 
         try:
-            with retry(10):
-                toy_settings.change(
-                    key,
-                    value,
-                    timestamp=timezone.now(),
-                    by="Some User",
-                )
+            toy_settings.change(
+                key,
+                value,
+                timestamp=timezone.now(),
+                by="Some User",
+            )
         except services.NotSet:
             messages.error(self.request, f"there is no {key!r} setting to change")
         else:
@@ -163,15 +150,14 @@ class UnsetSetting(generic.RedirectView):
     def post(
         self, request: http.HttpRequest, key: str, *args: Any, **kwargs: Any
     ) -> http.HttpResponse:
-        toy_settings = services.ToySettings.new()
+        toy_settings = services.ToySettings.new(max_wait_seconds=MAX_WAIT_SECONDS)
 
         try:
-            with retry(10):
-                toy_settings.unset(
-                    key,
-                    timestamp=timezone.now(),
-                    by="Some User",
-                )
+            toy_settings.unset(
+                key,
+                timestamp=timezone.now(),
+                by="Some User",
+            )
         except services.NotSet:
             messages.error(request, f"there is no {key!r} setting to unset")
         else:

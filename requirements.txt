@@ -2,3 +2,4 @@ attrs
 cattrs
 django
 tenacity
+typing_extensions
