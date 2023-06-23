@@ -11,6 +11,12 @@ from typing_extensions import Self
 from toy_settings.domain import events
 from toy_settings.domain import queries
 
+DEFAULT_TOY_SETTINGS_COMMITTER = "toy_settings.units_of_work.django.DjangoCommitter"
+
+
+def get_committer() -> Committer:
+    return import_string(DEFAULT_TOY_SETTINGS_COMMITTER)()
+
 
 @contextmanager
 def commit_on_success(committer: Committer) -> Iterator[list[events.Event]]:
