@@ -7,7 +7,8 @@ from django.db import transaction
 
 from toy_settings.application import unit_of_work
 from toy_settings.domain import events
-from toy_settings.repositories.django import models
+
+from . import models
 
 
 class DjangoCommitter(unit_of_work.Committer):
