@@ -11,16 +11,11 @@ from toy_settings.domain import queries
 class MemoryRepo(queries.Repository):
     history: list[events.Event] = attrs.field(factory=list)
 
-    def record(self, event: events.Event) -> None:
-        self.history.append(event)
-
-    def events_for_key(self, key: str) -> list[events.Event]:
+    def events_for_key(self, key: str) -> list[events.Event]:  # pragma: no cover
         return sorted(
             (event for event in self.history if event.key == key),
             key=lambda e: e.timestamp,
         )
-
-    # projections
 
     def current_value(self, key: str) -> str | None:
         return self.all_settings().get(key, None)
@@ -32,6 +27,3 @@ class MemoryRepo(queries.Repository):
                 key=lambda e: e.timestamp,
             )
         )
-
-
-MEMORY_REPO = MemoryRepo()

@@ -10,23 +10,6 @@ from . import models
 
 
 class DjangoRepo(queries.Repository):
-    def record(self, event: events.Event) -> None:
-        """Record a new event.
-
-        Raises:
-            StaleState: The state has changed and recording is no longer safe.
-        """
-        event_type, event_type_version = models.EVENT_TYPES[type(event)]
-        models.Event.objects.create(
-            event_type=event_type,
-            event_type_version=event_type_version,
-            timestamp=event.timestamp,
-            key=event.key,
-            payload=models.Event.payload_converter.dumps(event),
-        )
-
-    # projections
-
     def _events(self, filter: Q = Q()) -> list[events.Event]:
         return [
             models.Event.payload_converter.loads(

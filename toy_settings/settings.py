@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "toy_settings.repositories.django",
+    "toy_settings.django_back_end",
 ]
 
 MIDDLEWARE = [

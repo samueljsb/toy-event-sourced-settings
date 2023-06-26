@@ -4,9 +4,9 @@ import datetime
 
 import pytest
 
+from testing.domain.queries import MemoryRepo
 from tests.domain import factories
 from toy_settings.domain import operations
-from toy_settings.repositories.memory import MemoryRepo
 
 
 def test_set():

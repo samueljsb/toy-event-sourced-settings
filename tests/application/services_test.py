@@ -4,10 +4,10 @@ import datetime
 
 import pytest
 
+from testing.application.unit_of_work import MemoryCommitter
+from testing.domain.queries import MemoryRepo
 from toy_settings.application import services
 from toy_settings.domain import events
-from toy_settings.repositories.memory import MemoryRepo
-from toy_settings.units_of_work.memory import MemoryCommitter
 
 
 def test_set():
