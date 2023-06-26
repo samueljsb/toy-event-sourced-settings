@@ -5,12 +5,10 @@ import os
 import unittest.mock
 
 import pytest
-from django.utils import timezone
 from django_webtest import DjangoTestApp
 from django_webtest import DjangoWebtestResponse
 
 from toy_settings import config
-from toy_settings.domain import events
 
 pytestmark = pytest.mark.django_db(transaction=True)
 
@@ -28,20 +26,6 @@ def _get_messages(response: DjangoWebtestResponse) -> list[tuple[str, str]]:
     ]
 
 
-def test_setting_history(django_app: DjangoTestApp):
-    repo = config.get_repository()
-    repo.record(
-        events.Set(
-            timestamp=timezone.now(),
-            by="Some user",
-            key="FOO",
-            value="42",
-        )
-    )
-    response = django_app.get("/history/FOO/")
-    assert response.status_code == 200
-
-
 def _set_setting(
     django_app: DjangoTestApp, key: str, value: str
 ) -> DjangoWebtestResponse:
@@ -50,6 +34,13 @@ def _set_setting(
     form["key"] = key
     form["value"] = value
     return form.submit()
+
+
+def test_setting_history(django_app: DjangoTestApp):
+    _set_setting(django_app, "FOO", "42")
+
+    response = django_app.get("/history/FOO/")
+    assert response.status_code == 200
 
 
 def test_settings_json(django_app: DjangoTestApp):
