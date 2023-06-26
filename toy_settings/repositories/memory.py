@@ -11,9 +11,6 @@ from toy_settings.domain import queries
 class MemoryRepo(queries.Repository):
     history: list[events.Event] = attrs.field(factory=list)
 
-    def record(self, event: events.Event) -> None:
-        self.history.append(event)
-
     def events_for_key(self, key: str) -> list[events.Event]:
         return sorted(
             (event for event in self.history if event.key == key),
