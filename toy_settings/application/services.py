@@ -9,7 +9,6 @@ from tenacity import Retrying
 from tenacity import retry_if_exception_type
 from tenacity import wait_random_exponential
 
-from toy_settings import config
 from toy_settings.domain import operations
 from toy_settings.domain import queries
 
@@ -31,14 +30,6 @@ class ToySettings:
     state: queries.Repository
     committer: unit_of_work.Committer
     max_wait_seconds: int
-
-    @classmethod
-    def new(cls, max_wait_seconds: int = 0) -> ToySettings:
-        return cls(
-            state=config.get_repository(),
-            committer=config.get_committer(),
-            max_wait_seconds=max_wait_seconds,
-        )
 
     @contextlib.contextmanager
     def retry(self) -> Generator[None, None, None]:

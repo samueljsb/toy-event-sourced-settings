@@ -76,7 +76,7 @@ class SetSetting(generic.FormView):
         return initial
 
     def form_valid(self, form: NewSettingForm) -> HttpResponse:
-        toy_settings = services.ToySettings.new(max_wait_seconds=MAX_WAIT_SECONDS)
+        toy_settings = config.get_services(max_wait_seconds=MAX_WAIT_SECONDS)
 
         key = normalize_key(form.cleaned_data["key"])
         value = form.cleaned_data["value"]
@@ -125,7 +125,7 @@ class ChangeSetting(generic.FormView):
         return initial
 
     def form_valid(self, form: ChangeSetting) -> HttpResponse:
-        toy_settings = services.ToySettings.new(max_wait_seconds=MAX_WAIT_SECONDS)
+        toy_settings = config.get_services(max_wait_seconds=MAX_WAIT_SECONDS)
 
         key = normalize_key(form.cleaned_data["key"])
         value = form.cleaned_data["value"]
@@ -151,7 +151,7 @@ class UnsetSetting(generic.RedirectView):
     def post(
         self, request: http.HttpRequest, key: str, *args: Any, **kwargs: Any
     ) -> http.HttpResponse:
-        toy_settings = services.ToySettings.new(max_wait_seconds=MAX_WAIT_SECONDS)
+        toy_settings = config.get_services(max_wait_seconds=MAX_WAIT_SECONDS)
 
         try:
             toy_settings.unset(
