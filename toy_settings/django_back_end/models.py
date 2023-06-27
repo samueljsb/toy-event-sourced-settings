@@ -25,3 +25,16 @@ class Event(models.Model):
     timestamp = models.DateTimeField()
     payload = models.CharField(max_length=500)
     payload_converter = cattrs.preconf.json.make_converter()
+
+
+class Sequence(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.PROTECT)
+    key = models.CharField(max_length=100)
+    index = models.PositiveIntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["key", "index"], name="unique_index_per_key"
+            )
+        ]
