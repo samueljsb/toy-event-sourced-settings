@@ -22,6 +22,9 @@ class DjangoRepo(queries.Repository):
         """Retrieve the events for this key in chronological order."""
         return self._events(Q(key=key))
 
+    def get_setting(self, key: str) -> projections.Setting:
+        return projections.current_settings(self.events_for_key(key))[key]
+
     def current_value(self, key: str) -> str | None:
         """Get the current value of a setting."""
         return self.get_setting(key).value

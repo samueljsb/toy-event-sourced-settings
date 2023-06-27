@@ -44,7 +44,7 @@ def test_set_cannot_update_value():
 def test_can_change_setting():
     set_at = datetime.datetime.now()
     history: list[events.Event] = [
-        factories.Set(key="FOO", value="42", timestamp=set_at, by="me"),
+        factories.Set(key="FOO", value="42", timestamp=set_at, by="me", index=0),
     ]
     committer = MemoryCommitter()
     toy_settings = services.ToySettings(
@@ -55,7 +55,9 @@ def test_can_change_setting():
     toy_settings.change("FOO", "43", timestamp=changed_at, by="me")
 
     assert committer.committed == [
-        events.Changed(key="FOO", new_value="43", timestamp=changed_at, by="me", idx=0),
+        events.Changed(
+            key="FOO", new_value="43", timestamp=changed_at, by="me", index=1
+        ),
     ]
 
 
@@ -76,7 +78,7 @@ def test_cannot_change_non_existent_setting():
 def test_unset_removes_value():
     set_at = datetime.datetime.now()
     history: list[events.Event] = [
-        factories.Set(key="FOO", value="42", timestamp=set_at, by="me"),
+        factories.Set(key="FOO", value="42", timestamp=set_at, by="me", index=0),
     ]
     committer = MemoryCommitter()
     toy_settings = services.ToySettings(
@@ -87,7 +89,7 @@ def test_unset_removes_value():
     toy_settings.unset("FOO", timestamp=unset_at, by="me")
 
     assert committer.committed == [
-        events.Unset(key="FOO", timestamp=unset_at, by="me", idx=0),
+        events.Unset(key="FOO", timestamp=unset_at, by="me", index=1),
     ]
 
 
