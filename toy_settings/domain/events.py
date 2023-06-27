@@ -9,7 +9,6 @@ import attrs
 @attrs.frozen
 class Event(abc.ABC):
     timestamp: datetime.datetime
-    by: str
 
     key: str
 
@@ -18,12 +17,16 @@ class Event(abc.ABC):
 class Set(Event):
     value: str
 
+    by: str
+
 
 @attrs.frozen
 class Changed(Event):
     new_value: str
 
+    by: str
+
 
 @attrs.frozen
 class Unset(Event):
-    pass
+    by: str
