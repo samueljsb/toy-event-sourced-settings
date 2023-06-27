@@ -21,7 +21,7 @@ def test_set():
     toy_settings.set("FOO", "42", timestamp=set_at, by="me")
 
     assert committer.committed == [
-        events.Set(key="FOO", value="42", timestamp=set_at, by="me"),
+        events.Set(key="FOO", value="42", timestamp=set_at, by="me", index=0),
     ]
 
 
@@ -55,7 +55,7 @@ def test_can_change_setting():
     toy_settings.change("FOO", "43", timestamp=changed_at, by="me")
 
     assert committer.committed == [
-        events.Changed(key="FOO", new_value="43", timestamp=changed_at, by="me"),
+        events.Changed(key="FOO", new_value="43", timestamp=changed_at, by="me", idx=0),
     ]
 
 
@@ -87,7 +87,7 @@ def test_unset_removes_value():
     toy_settings.unset("FOO", timestamp=unset_at, by="me")
 
     assert committer.committed == [
-        events.Unset(key="FOO", timestamp=unset_at, by="me"),
+        events.Unset(key="FOO", timestamp=unset_at, by="me", idx=0),
     ]
 
 

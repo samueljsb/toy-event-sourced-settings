@@ -8,6 +8,7 @@ import attrs
 
 @attrs.frozen
 class Event(abc.ABC):
+    index: int
     timestamp: datetime.datetime
 
     key: str

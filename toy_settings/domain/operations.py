@@ -41,6 +41,7 @@ class ToySettings:
             raise AlreadySet(key)
 
         return events.Set(
+            idx=0,  # TODO
             timestamp=timestamp,
             by=by,
             key=key,
@@ -66,6 +67,7 @@ class ToySettings:
             raise NotSet(key)
 
         return events.Changed(
+            idx=0,  # TODO
             timestamp=timestamp,
             by=by,
             key=key,
@@ -90,6 +92,7 @@ class ToySettings:
             raise NotSet(key)
 
         return events.Unset(
+            idx=0,  # TODO
             timestamp=timestamp,
             by=by,
             key=key,

@@ -12,6 +12,7 @@ class Event(factory.Factory):
         model = events.Event
         abstract = True
 
+    index = factory.Sequence(int)
     timestamp = factory.LazyFunction(datetime.datetime.now)
 
 
