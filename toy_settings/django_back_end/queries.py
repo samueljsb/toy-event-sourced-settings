@@ -24,8 +24,12 @@ class DjangoRepo(queries.Repository):
 
     def current_value(self, key: str) -> str | None:
         """Get the current value of a setting."""
-        return projections.current_settings(self.events_for_key(key)).get(key)
+        return self.get_setting(key).value
 
     def all_settings(self) -> dict[str, str]:
         """Get the current value of all settings."""
-        return projections.current_settings(self._events())
+        return {
+            key: setting.value
+            for key, setting in projections.current_settings(self._events()).items()
+            if setting.value is not None
+        }

@@ -21,9 +21,13 @@ class MemoryRepo(queries.Repository):
         return self.all_settings().get(key, None)
 
     def all_settings(self) -> dict[str, str]:
-        return projections.current_settings(
-            sorted(
-                self.history,
-                key=lambda e: e.timestamp,
-            )
-        )
+        return {
+            key: setting.value
+            for key, setting in projections.current_settings(
+                sorted(
+                    self.history,
+                    key=lambda e: e.timestamp,
+                )
+            ).items()
+            if setting.value is not None
+        }
