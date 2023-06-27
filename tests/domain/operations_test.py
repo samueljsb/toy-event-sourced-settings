@@ -4,8 +4,8 @@ import datetime
 
 import pytest
 
+from testing.domain import factories
 from testing.domain.queries import MemoryRepo
-from tests.domain import factories
 from toy_settings.domain import operations
 
 
