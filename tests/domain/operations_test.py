@@ -4,8 +4,8 @@ import datetime
 
 import pytest
 
+from testing.domain import factories
 from testing.domain.queries import MemoryRepo
-from tests.domain import factories
 from toy_settings.domain import operations
 
 
@@ -16,7 +16,13 @@ def test_set():
     set_at = datetime.datetime.now()
     new_events = toy_settings.set("FOO", "42", timestamp=set_at, by="me")
 
-    assert new_events == factories.Set(key="FOO", value="42", timestamp=set_at, by="me")
+    assert new_events == factories.Set(
+        key="FOO",
+        value="42",
+        timestamp=set_at,
+        by="me",
+        index=0,
+    )
 
 
 def test_set_cannot_update_value():
@@ -34,7 +40,7 @@ def test_set_cannot_update_value():
 def test_can_change_setting():
     repo = MemoryRepo(
         [
-            factories.Set(key="FOO", value="42"),
+            factories.Set(key="FOO", value="42", index=0),
         ]
     )
     toy_settings = operations.ToySettings(state=repo)
@@ -43,7 +49,11 @@ def test_can_change_setting():
     new_events = toy_settings.change("FOO", "43", timestamp=changed_at, by="me")
 
     assert new_events == factories.Changed(
-        key="FOO", new_value="43", timestamp=changed_at, by="me"
+        key="FOO",
+        new_value="43",
+        timestamp=changed_at,
+        by="me",
+        index=1,
     )
 
 
@@ -73,7 +83,7 @@ def test_cannot_change_unset_setting():
 def test_unset_removes_value():
     repo = MemoryRepo(
         [
-            factories.Set(key="FOO", value="42"),
+            factories.Set(key="FOO", value="42", index=0),
         ]
     )
     toy_settings = operations.ToySettings(state=repo)
@@ -81,7 +91,12 @@ def test_unset_removes_value():
     unset_at = datetime.datetime.now()
     new_events = toy_settings.unset("FOO", timestamp=unset_at, by="me")
 
-    assert new_events == factories.Unset(key="FOO", timestamp=unset_at, by="me")
+    assert new_events == factories.Unset(
+        key="FOO",
+        timestamp=unset_at,
+        by="me",
+        index=1,
+    )
 
 
 def test_unset_already_unset():

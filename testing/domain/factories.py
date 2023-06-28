@@ -12,8 +12,8 @@ class Event(factory.Factory):
         model = events.Event
         abstract = True
 
+    index = factory.Sequence(int)
     timestamp = factory.LazyFunction(datetime.datetime.now)
-    by = "me"
 
 
 class Set(Event):
@@ -23,6 +23,8 @@ class Set(Event):
     key: str
     value: str
 
+    by = "me"
+
 
 class Changed(Event):
     class Meta:
@@ -31,9 +33,13 @@ class Changed(Event):
     key: str
     new_value: str
 
+    by = "me"
+
 
 class Unset(Event):
     class Meta:
         model = events.Unset
 
     key: str
+
+    by = "me"

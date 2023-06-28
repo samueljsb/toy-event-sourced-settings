@@ -36,11 +36,12 @@ class ToySettings:
         Raises:
             AlreadySet: The setting already exists.
         """
-        current_value = self.state.current_value(key)
-        if current_value is not None:
+        setting = self.state.get_setting(key)
+        if setting.value is not None:
             raise AlreadySet(key)
 
         return events.Set(
+            index=setting.next_index,
             timestamp=timestamp,
             by=by,
             key=key,
@@ -61,11 +62,12 @@ class ToySettings:
         Raises:
             NotSet: There is no setting for this key.
         """
-        current_value = self.state.current_value(key)
-        if current_value is None:
+        setting = self.state.get_setting(key)
+        if setting.value is None:
             raise NotSet(key)
 
         return events.Changed(
+            index=setting.next_index,
             timestamp=timestamp,
             by=by,
             key=key,
@@ -85,11 +87,12 @@ class ToySettings:
         Raises:
             NotSet: There is no setting for this key.
         """
-        current_value = self.state.current_value(key)
-        if current_value is None:
+        setting = self.state.get_setting(key)
+        if setting.value is None:
             raise NotSet(key)
 
         return events.Unset(
+            index=setting.next_index,
             timestamp=timestamp,
             by=by,
             key=key,
