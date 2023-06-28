@@ -41,7 +41,7 @@ class ToySettings:
             raise AlreadySet(key)
 
         return events.Set(
-            index=setting.index + 1,
+            index=setting.next_index,
             timestamp=timestamp,
             by=by,
             key=key,
@@ -67,7 +67,7 @@ class ToySettings:
             raise NotSet(key)
 
         return events.Changed(
-            index=setting.index + 1,
+            index=setting.next_index,
             timestamp=timestamp,
             by=by,
             key=key,
@@ -92,7 +92,7 @@ class ToySettings:
             raise NotSet(key)
 
         return events.Unset(
-            index=setting.index + 1,
+            index=setting.next_index,
             timestamp=timestamp,
             by=by,
             key=key,

@@ -12,7 +12,7 @@ from . import events
 @attrs.define
 class Setting:
     value: str | None = None
-    index: int = -1
+    next_index: int = 0
 
 
 def current_settings(history: Iterable[events.Event]) -> defaultdict[str, Setting]:
@@ -31,16 +31,16 @@ def _handle_event(event: events.Event, settings: dict[str, Setting]) -> None:
 @_handle_event.register
 def _(event: events.Set, settings: dict[str, Setting]) -> None:
     settings[event.key].value = event.value
-    settings[event.key].index = event.index
+    settings[event.key].next_index = event.index + 1
 
 
 @_handle_event.register
 def _(event: events.Changed, settings: dict[str, Setting]) -> None:
     settings[event.key].value = event.new_value
-    settings[event.key].index = event.index
+    settings[event.key].next_index = event.index + 1
 
 
 @_handle_event.register
 def _(event: events.Unset, settings: dict[str, Setting]) -> None:
     settings[event.key].value = None
-    settings[event.key].index = event.index
+    settings[event.key].next_index = event.index + 1

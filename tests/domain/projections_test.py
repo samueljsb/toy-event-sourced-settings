@@ -16,7 +16,7 @@ def test_current_settings():
     settings = projections.current_settings(history)
 
     assert settings == {
-        "set-once": projections.Setting("42", index=0),
-        "set-and-changed": projections.Setting("43", index=1),
-        "set-and-unset": projections.Setting(None, index=1),
+        "set-once": projections.Setting("42", next_index=1),
+        "set-and-changed": projections.Setting("43", next_index=2),
+        "set-and-unset": projections.Setting(None, next_index=2),
     }
