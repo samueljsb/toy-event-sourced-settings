@@ -14,8 +14,9 @@ from toy_settings.domain import events
 
 def test_set():
     committer = MemoryCommitter()
+    logger = MemoryLogger()
     toy_settings = services.ToySettings(
-        state=MemoryRepo(history=[]), committer=committer, logger=MemoryLogger()
+        state=MemoryRepo(history=[]), committer=committer, logger=logger
     )
 
     set_at = datetime.datetime.now()
@@ -24,6 +25,7 @@ def test_set():
     assert committer.committed == [
         events.Set(key="FOO", value="42", timestamp=set_at, by="me", index=0),
     ]
+    assert logger.logged == [("info", "set", (), {"key": "FOO", "value": "42"})]
 
 
 def test_set_cannot_update_value():
@@ -32,14 +34,16 @@ def test_set_cannot_update_value():
         factories.Set(key="FOO", value="42", timestamp=set_at, by="me"),
     ]
     committer = MemoryCommitter()
+    logger = MemoryLogger()
     toy_settings = services.ToySettings(
-        state=MemoryRepo(history=history), committer=committer, logger=MemoryLogger()
+        state=MemoryRepo(history=history), committer=committer, logger=logger
     )
 
     with pytest.raises(services.AlreadySet):
         toy_settings.set("FOO", "43", timestamp=datetime.datetime.now(), by="me")
 
     assert committer.committed == []
+    assert logger.logged == [("error", "already set", (), {"key": "FOO"})]
 
 
 def test_can_change_setting():
@@ -48,8 +52,9 @@ def test_can_change_setting():
         factories.Set(key="FOO", value="42", timestamp=set_at, by="me", index=0),
     ]
     committer = MemoryCommitter()
+    logger = MemoryLogger()
     toy_settings = services.ToySettings(
-        state=MemoryRepo(history=history), committer=committer, logger=MemoryLogger()
+        state=MemoryRepo(history=history), committer=committer, logger=logger
     )
 
     changed_at = datetime.datetime.now()
@@ -60,13 +65,15 @@ def test_can_change_setting():
             key="FOO", new_value="43", timestamp=changed_at, by="me", index=1
         ),
     ]
+    assert logger.logged == [("info", "changed", (), {"key": "FOO", "value": "43"})]
 
 
 def test_cannot_change_non_existent_setting():
     history: list[events.Event] = []
     committer = MemoryCommitter()
+    logger = MemoryLogger()
     toy_settings = services.ToySettings(
-        state=MemoryRepo(history=history), committer=committer, logger=MemoryLogger()
+        state=MemoryRepo(history=history), committer=committer, logger=logger
     )
 
     # check we are not allowed to change a setting that does not exist
@@ -74,6 +81,7 @@ def test_cannot_change_non_existent_setting():
         toy_settings.change("FOO", "42", timestamp=datetime.datetime.now(), by="me")
 
     assert committer.committed == []
+    assert logger.logged == [("error", "not set", (), {"key": "FOO"})]
 
 
 def test_unset_removes_value():
@@ -82,8 +90,9 @@ def test_unset_removes_value():
         factories.Set(key="FOO", value="42", timestamp=set_at, by="me", index=0),
     ]
     committer = MemoryCommitter()
+    logger = MemoryLogger()
     toy_settings = services.ToySettings(
-        state=MemoryRepo(history=history), committer=committer, logger=MemoryLogger()
+        state=MemoryRepo(history=history), committer=committer, logger=logger
     )
 
     unset_at = datetime.datetime.now()
@@ -92,6 +101,7 @@ def test_unset_removes_value():
     assert committer.committed == [
         events.Unset(key="FOO", timestamp=unset_at, by="me", index=1),
     ]
+    assert logger.logged == [("info", "unset", (), {"key": "FOO"})]
 
 
 def test_cannot_change_unset_setting():
@@ -102,8 +112,9 @@ def test_cannot_change_unset_setting():
         factories.Unset(key="FOO", timestamp=unset_at, by="me"),
     ]
     committer = MemoryCommitter()
+    logger = MemoryLogger()
     toy_settings = services.ToySettings(
-        state=MemoryRepo(history=history), committer=committer, logger=MemoryLogger()
+        state=MemoryRepo(history=history), committer=committer, logger=logger
     )
 
     # check we are not allowed to change a setting that has been unset
@@ -111,6 +122,7 @@ def test_cannot_change_unset_setting():
         toy_settings.change("FOO", "42", timestamp=datetime.datetime.now(), by="me")
 
     assert committer.committed == []
+    assert logger.logged == [("error", "not set", (), {"key": "FOO"})]
 
 
 def test_unset_already_unset():
@@ -121,8 +133,9 @@ def test_unset_already_unset():
         factories.Unset(key="FOO", timestamp=unset_at, by="me"),
     ]
     committer = MemoryCommitter()
+    logger = MemoryLogger()
     toy_settings = services.ToySettings(
-        state=MemoryRepo(history=history), committer=committer, logger=MemoryLogger()
+        state=MemoryRepo(history=history), committer=committer, logger=logger
     )
 
     # check we are not allowed to unset it again
@@ -130,12 +143,14 @@ def test_unset_already_unset():
         toy_settings.unset("FOO", timestamp=datetime.datetime.now(), by="me")
 
     assert committer.committed == []
+    assert logger.logged == [("error", "not set", (), {"key": "FOO"})]
 
 
 def test_unset_never_set():
     committer = MemoryCommitter()
+    logger = MemoryLogger()
     toy_settings = services.ToySettings(
-        state=MemoryRepo(history=[]), committer=committer, logger=MemoryLogger()
+        state=MemoryRepo(history=[]), committer=committer, logger=logger
     )
 
     # check we are not allowed to unset it again
@@ -143,3 +158,4 @@ def test_unset_never_set():
         toy_settings.unset("FOO", timestamp=datetime.datetime.now(), by="me")
 
     assert committer.committed == []
+    assert logger.logged == [("error", "not set", (), {"key": "FOO"})]

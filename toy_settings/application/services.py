@@ -65,9 +65,11 @@ class ToySettings:
                     by=by,
                 )
             except operations.AlreadySet as exc:
+                self.logger.error("already set", key=key)
                 raise AlreadySet(key) from exc
             else:
                 new_events.append(new_event)
+                self.logger.info("set", key=key, value=value)
 
     def change(
         self,
@@ -93,9 +95,11 @@ class ToySettings:
                     by=by,
                 )
             except operations.NotSet as exc:
+                self.logger.error("not set", key=key)
                 raise NotSet(key) from exc
             else:
                 new_events.append(new_event)
+                self.logger.info("changed", key=key, value=new_value)
 
     def unset(
         self,
@@ -119,6 +123,8 @@ class ToySettings:
                     by=by,
                 )
             except operations.NotSet as exc:
+                self.logger.error("not set", key=key)
                 raise NotSet(key) from exc
             else:
                 new_events.append(new_event)
+                self.logger.info("unset", key=key)
