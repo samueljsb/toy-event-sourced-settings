@@ -12,6 +12,7 @@ from tenacity import wait_random_exponential
 from toy_settings.domain import operations
 from toy_settings.domain import queries
 
+from . import logging
 from . import unit_of_work
 
 
@@ -29,6 +30,7 @@ class NotSet(Exception):
 class ToySettings:
     state: queries.Repository
     committer: unit_of_work.Committer
+    logger: logging.Logger
 
     @contextlib.contextmanager
     def retry(self, max_wait_seconds: int) -> Generator[None, None, None]:
