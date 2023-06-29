@@ -15,9 +15,8 @@ def get_committer() -> Committer:
     return DjangoCommitter()
 
 
-def get_services(max_wait_seconds: int) -> ToySettings:
+def get_services() -> ToySettings:
     return ToySettings(
         state=get_repository(),
         committer=get_committer(),
-        max_wait_seconds=max_wait_seconds,
     )

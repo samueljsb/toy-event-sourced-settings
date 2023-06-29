@@ -10,6 +10,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.utils import timezone
 from django.views import generic
+from tenacity import RetryError
 
 from toy_settings import config
 
@@ -76,17 +77,22 @@ class SetSetting(generic.FormView):
         return initial
 
     def form_valid(self, form: NewSettingForm) -> HttpResponse:
-        toy_settings = config.get_services(max_wait_seconds=MAX_WAIT_SECONDS)
+        toy_settings = config.get_services()
 
         key = normalize_key(form.cleaned_data["key"])
         value = form.cleaned_data["value"]
 
         try:
-            toy_settings.set(
-                key,
-                value,
-                timestamp=timezone.now(),
-                by="Some User",
+            with toy_settings.retry(max_wait_seconds=MAX_WAIT_SECONDS):
+                toy_settings.set(
+                    key,
+                    value,
+                    timestamp=timezone.now(),
+                    by="Some User",
+                )
+        except RetryError:  # pragma: no cover
+            messages.error(
+                self.request, "oh no! Something went wrong. Please try again."
             )
         except services.AlreadySet:
             messages.error(self.request, f"{key!r} is already set")
@@ -125,17 +131,22 @@ class ChangeSetting(generic.FormView):
         return initial
 
     def form_valid(self, form: ChangeSetting) -> HttpResponse:
-        toy_settings = config.get_services(max_wait_seconds=MAX_WAIT_SECONDS)
+        toy_settings = config.get_services()
 
         key = normalize_key(form.cleaned_data["key"])
         value = form.cleaned_data["value"]
 
         try:
-            toy_settings.change(
-                key,
-                value,
-                timestamp=timezone.now(),
-                by="Some User",
+            with toy_settings.retry(max_wait_seconds=MAX_WAIT_SECONDS):
+                toy_settings.change(
+                    key,
+                    value,
+                    timestamp=timezone.now(),
+                    by="Some User",
+                )
+        except RetryError:  # pragma: no cover
+            messages.error(
+                self.request, "oh no! Something went wrong. Please try again."
             )
         except services.NotSet:
             messages.error(self.request, f"there is no {key!r} setting to change")
@@ -151,13 +162,18 @@ class UnsetSetting(generic.RedirectView):
     def post(
         self, request: http.HttpRequest, key: str, *args: Any, **kwargs: Any
     ) -> http.HttpResponse:
-        toy_settings = config.get_services(max_wait_seconds=MAX_WAIT_SECONDS)
+        toy_settings = config.get_services()
 
         try:
-            toy_settings.unset(
-                key,
-                timestamp=timezone.now(),
-                by="Some User",
+            with toy_settings.retry(max_wait_seconds=MAX_WAIT_SECONDS):
+                toy_settings.unset(
+                    key,
+                    timestamp=timezone.now(),
+                    by="Some User",
+                )
+        except RetryError:  # pragma: no cover
+            messages.error(
+                self.request, "oh no! Something went wrong. Please try again."
             )
         except services.NotSet:
             messages.error(request, f"there is no {key!r} setting to unset")

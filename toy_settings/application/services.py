@@ -29,13 +29,12 @@ class NotSet(Exception):
 class ToySettings:
     state: queries.Repository
     committer: unit_of_work.Committer
-    max_wait_seconds: int
 
     @contextlib.contextmanager
-    def retry(self) -> Generator[None, None, None]:
+    def retry(self, max_wait_seconds: int) -> Generator[None, None, None]:
         for attempt in Retrying(
             retry=retry_if_exception_type(unit_of_work.StaleState),
-            wait=wait_random_exponential(multiplier=0.1, max=self.max_wait_seconds),
+            wait=wait_random_exponential(multiplier=0.1, max=max_wait_seconds),
         ):
             with attempt:
                 yield
@@ -54,7 +53,7 @@ class ToySettings:
         Raises:
             AlreadySet: The setting already exists.
         """
-        with self.retry(), unit_of_work.commit_on_success(self.committer) as new_events:
+        with unit_of_work.commit_on_success(self.committer) as new_events:
             domain = operations.ToySettings(state=self.state)
             try:
                 new_event = domain.set(
@@ -82,7 +81,7 @@ class ToySettings:
         Raises:
             NotSet: There is no setting for this key.
         """
-        with self.retry(), unit_of_work.commit_on_success(self.committer) as new_events:
+        with unit_of_work.commit_on_success(self.committer) as new_events:
             domain = operations.ToySettings(state=self.state)
             try:
                 new_event = domain.change(
@@ -109,7 +108,7 @@ class ToySettings:
         Raises:
             NotSet: There is no setting for this key.
         """
-        with self.retry(), unit_of_work.commit_on_success(self.committer) as new_events:
+        with unit_of_work.commit_on_success(self.committer) as new_events:
             domain = operations.ToySettings(state=self.state)
             try:
                 new_event = domain.unset(
