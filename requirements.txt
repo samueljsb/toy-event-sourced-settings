@@ -1,5 +1,6 @@
 attrs
 cattrs
 django
+structlog
 tenacity
 typing_extensions
