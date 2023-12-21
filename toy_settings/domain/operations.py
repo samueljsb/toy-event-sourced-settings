@@ -21,6 +21,7 @@ class NotSet(Exception):
 @attrs.frozen
 class ToySettings:
     state: queries.Repository
+    new_events: list[events.Event]
 
     def set(
         self,
@@ -29,7 +30,7 @@ class ToySettings:
         *,
         timestamp: datetime.datetime,
         by: str,
-    ) -> events.Event:
+    ) -> None:
         """
         Create a new setting.
 
@@ -40,12 +41,14 @@ class ToySettings:
         if setting.value is not None:
             raise AlreadySet(key)
 
-        return events.Set(
-            index=setting.next_index,
-            timestamp=timestamp,
-            by=by,
-            key=key,
-            value=value,
+        self.new_events.append(
+            events.Set(
+                index=setting.next_index,
+                timestamp=timestamp,
+                by=by,
+                key=key,
+                value=value,
+            )
         )
 
     def change(
@@ -55,7 +58,7 @@ class ToySettings:
         *,
         timestamp: datetime.datetime,
         by: str,
-    ) -> events.Event:
+    ) -> None:
         """
         Change the current value of a setting.
 
@@ -66,12 +69,14 @@ class ToySettings:
         if setting.value is None:
             raise NotSet(key)
 
-        return events.Changed(
-            index=setting.next_index,
-            timestamp=timestamp,
-            by=by,
-            key=key,
-            new_value=new_value,
+        self.new_events.append(
+            events.Changed(
+                index=setting.next_index,
+                timestamp=timestamp,
+                by=by,
+                key=key,
+                new_value=new_value,
+            )
         )
 
     def unset(
@@ -80,7 +85,7 @@ class ToySettings:
         *,
         timestamp: datetime.datetime,
         by: str,
-    ) -> events.Event:
+    ) -> None:
         """
         Unset a setting.
 
@@ -91,9 +96,11 @@ class ToySettings:
         if setting.value is None:
             raise NotSet(key)
 
-        return events.Unset(
-            index=setting.next_index,
-            timestamp=timestamp,
-            by=by,
-            key=key,
+        self.new_events.append(
+            events.Unset(
+                index=setting.next_index,
+                timestamp=timestamp,
+                by=by,
+                key=key,
+            )
         )
